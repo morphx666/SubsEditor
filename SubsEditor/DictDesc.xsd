@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:d="http://openoffice.org/extensions/description/2006" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://openoffice.org/extensions/description/2006" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="description">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="version">
+          <xs:complexType>
+            <xs:attribute name="value" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="identifier">
+          <xs:complexType>
+            <xs:attribute name="value" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="display-name">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="name">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="lang" type="xs:string" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="platform">
+          <xs:complexType>
+            <xs:attribute name="value" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="dependencies">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OpenOffice.org-minimal-version">
+                <xs:complexType>
+                  <xs:attribute name="value" type="xs:decimal" use="required" />
+                  <xs:attribute ref="d:name" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:attribute name="name" type="xs:string" />
+</xs:schema>
