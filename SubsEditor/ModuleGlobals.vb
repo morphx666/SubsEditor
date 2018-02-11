@@ -1,5 +1,5 @@
-﻿Module modGlobals
-    Public Function StringToWindowState(ByVal state As String) As FormWindowState
+﻿Module ModuleGlobals
+    Public Function StringToWindowState(state As String) As FormWindowState
         Select Case state
             Case FormWindowState.Normal.ToString()
                 Return FormWindowState.Normal
@@ -12,17 +12,17 @@
         End Select
     End Function
 
-    Public Function StringToPoint(ByVal point As String) As Point
+    Public Function StringToPoint(point As String) As Point
         Dim tokens() = point.Substring(1, point.Length - 2).Split(","c)
         Return New Point(CInt(tokens(0).Split("="c)(1)), CInt(tokens(1).Split("="c)(1)))
     End Function
 
-    Public Function StringToSize(ByVal point As String) As Size
+    Public Function StringToSize(point As String) As Size
         Dim tokens() = point.Substring(1, point.Length - 2).Split(","c)
         Return New Size(CInt(tokens(0).Split("="c)(1)), CInt(tokens(1).Split("="c)(1)))
     End Function
 
-    Public Function StringToBoolean(ByVal value As String) As Boolean
+    Public Function StringToBoolean(value As String) As Boolean
         Dim b As Boolean = False
         Boolean.TryParse(value, b)
         Return b

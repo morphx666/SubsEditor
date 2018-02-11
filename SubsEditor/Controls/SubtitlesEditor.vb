@@ -91,9 +91,9 @@ Public Class SubtitlesEditor
         Set(value As DictionariesList)
             mDictionaries = value
 
-            txtPreviousSubtitle.Dictionaries = mDictionaries
-            txtCurrentSubtitle.Dictionaries = mDictionaries
-            txtNextSubtitle.Dictionaries = mDictionaries
+            TextBoxPreviousSubtitle.Dictionaries = mDictionaries
+            TextBoxCurrentSubtitle.Dictionaries = mDictionaries
+            TextBoxNextSubtitle.Dictionaries = mDictionaries
         End Set
     End Property
 
@@ -104,9 +104,9 @@ Public Class SubtitlesEditor
         Set(value As NHunspell.Hunspell)
             mSpellCheckerEngine = value
 
-            txtPreviousSubtitle.SpellCheckerEngine = mSpellCheckerEngine
-            txtCurrentSubtitle.SpellCheckerEngine = mSpellCheckerEngine
-            txtNextSubtitle.SpellCheckerEngine = mSpellCheckerEngine
+            TextBoxPreviousSubtitle.SpellCheckerEngine = mSpellCheckerEngine
+            TextBoxCurrentSubtitle.SpellCheckerEngine = mSpellCheckerEngine
+            TextBoxNextSubtitle.SpellCheckerEngine = mSpellCheckerEngine
         End Set
     End Property
 
@@ -116,160 +116,160 @@ Public Class SubtitlesEditor
         ignoreChangeEvents = True
 
         With mSubtitles(mSubtitleIndex)
-            nudHourStart.Text = .FromTimeOffsetted.Hours
-            nudMinuteStart.Text = .FromTimeOffsetted.Minutes
-            nudSecondStart.Text = .FromTimeOffsetted.Seconds
-            nudMilliSecondStart.Text = .FromTimeOffsetted.Milliseconds
+            NumericUpDownHourStart.Text = .FromTimeOffsetted.Hours
+            NumericUpDownMinuteStart.Text = .FromTimeOffsetted.Minutes
+            NumericUpDownSecondStart.Text = .FromTimeOffsetted.Seconds
+            NumericUpDownMilliSecondStart.Text = .FromTimeOffsetted.Milliseconds
 
             Select Case mode
                 Case Modes.SetEnd
-                    nudHourEnd.Text = .ToTimeOffsetted.Hours
-                    nudMinuteEnd.Text = .ToTimeOffsetted.Minutes
-                    nudSecondEnd.Text = .ToTimeOffsetted.Seconds
-                    nudMilliSecondEnd.Text = .ToTimeOffsetted.Milliseconds
+                    NumericUpDownHourEnd.Text = .ToTimeOffsetted.Hours
+                    NumericUpDownMinuteEnd.Text = .ToTimeOffsetted.Minutes
+                    NumericUpDownSecondEnd.Text = .ToTimeOffsetted.Seconds
+                    NumericUpDownMilliSecondEnd.Text = .ToTimeOffsetted.Milliseconds
                 Case Modes.SetLength
                     Dim length = .ToTimeOffsetted - .FromTimeOffsetted
-                    nudHourEnd.Text = length.Hours
-                    nudMinuteEnd.Text = length.Minutes
-                    nudSecondEnd.Text = length.Seconds
-                    nudMilliSecondEnd.Text = length.Milliseconds
+                    NumericUpDownHourEnd.Text = length.Hours
+                    NumericUpDownMinuteEnd.Text = length.Minutes
+                    NumericUpDownSecondEnd.Text = length.Seconds
+                    NumericUpDownMilliSecondEnd.Text = length.Milliseconds
             End Select
 
-            txtCurrentSubtitle.Text = .TextOffsetted
+            TextBoxCurrentSubtitle.Text = .TextOffsetted
         End With
 
         If mSubtitleIndex = 0 Then
-            txtPreviousSubtitle.Text = ""
-            txtPreviousSubtitle.Enabled = False
+            TextBoxPreviousSubtitle.Text = ""
+            TextBoxPreviousSubtitle.Enabled = False
         Else
-            txtPreviousSubtitle.Text = Subtitles(mSubtitleIndex - 1).TextOffsetted
-            txtPreviousSubtitle.Enabled = True
+            TextBoxPreviousSubtitle.Text = Subtitles(mSubtitleIndex - 1).TextOffsetted
+            TextBoxPreviousSubtitle.Enabled = True
         End If
 
         If mSubtitleIndex > mSubtitles.Count - 2 Then
-            txtNextSubtitle.Text = ""
-            txtNextSubtitle.Enabled = False
+            TextBoxNextSubtitle.Text = ""
+            TextBoxNextSubtitle.Enabled = False
         Else
-            txtNextSubtitle.Text = Subtitles(mSubtitleIndex + 1).TextOffsetted
-            txtNextSubtitle.Enabled = True
+            TextBoxNextSubtitle.Text = Subtitles(mSubtitleIndex + 1).TextOffsetted
+            TextBoxNextSubtitle.Enabled = True
         End If
 
-        vsBar.Minimum = 0
-        vsBar.Maximum = mSubtitles.Count + 8 ' hmmm... what? why + 8?
-        vsBar.Value = mSubtitleIndex
+        VScrollBarSubtitles.Minimum = 0
+        VScrollBarSubtitles.Maximum = mSubtitles.Count + 8 ' hmmm... what? why + 8?
+        VScrollBarSubtitles.Value = mSubtitleIndex
 
         ignoreChangeEvents = False
     End Sub
 
-    Private Sub TimeValueChanged(sender As System.Object, e As System.EventArgs) Handles nudHourStart.ValueChanged, nudHourEnd.ValueChanged,
-                                                                                          nudMinuteStart.ValueChanged, nudMinuteEnd.ValueChanged,
-                                                                                          nudSecondStart.ValueChanged, nudSecondEnd.ValueChanged,
-                                                                                          nudMilliSecondStart.ValueChanged, nudMilliSecondEnd.ValueChanged
+    Private Sub TimeValueChanged(sender As Object, e As EventArgs) Handles NumericUpDownHourStart.ValueChanged, NumericUpDownHourEnd.ValueChanged,
+                                                                                          NumericUpDownMinuteStart.ValueChanged, NumericUpDownMinuteEnd.ValueChanged,
+                                                                                          NumericUpDownSecondStart.ValueChanged, NumericUpDownSecondEnd.ValueChanged,
+                                                                                          NumericUpDownMilliSecondStart.ValueChanged, NumericUpDownMilliSecondEnd.ValueChanged
 
         If ignoreChangeEvents Then Exit Sub
 
-        If nudMilliSecondEnd.Value = 1000 Then
+        If NumericUpDownMilliSecondEnd.Value = 1000 Then
             ignoreChangeEvents = True
-            nudMilliSecondEnd.Value = 0
+            NumericUpDownMilliSecondEnd.Value = 0
             ignoreChangeEvents = False
 
-            nudSecondEnd.Value += 1
+            NumericUpDownSecondEnd.Value += 1
             Exit Sub
-        ElseIf nudMilliSecondEnd.Value = -1 Then
+        ElseIf NumericUpDownMilliSecondEnd.Value = -1 Then
             ignoreChangeEvents = True
-            nudMilliSecondEnd.Value = 999
+            NumericUpDownMilliSecondEnd.Value = 999
             ignoreChangeEvents = False
 
-            nudSecondEnd.Value -= 1
-            Exit Sub
-        End If
-
-        If nudSecondEnd.Value = 60 Then
-            ignoreChangeEvents = True
-            nudSecondEnd.Value = 0
-            ignoreChangeEvents = False
-
-            nudMinuteEnd.Value += 1
-            Exit Sub
-        ElseIf nudSecondEnd.Value = -1 Then
-            ignoreChangeEvents = True
-            nudSecondEnd.Value = 59
-            ignoreChangeEvents = False
-
-            nudMinuteEnd.Value -= 1
+            NumericUpDownSecondEnd.Value -= 1
             Exit Sub
         End If
 
-        If nudMinuteEnd.Value = 60 Then
+        If NumericUpDownSecondEnd.Value = 60 Then
             ignoreChangeEvents = True
-            nudMinuteEnd.Value = 0
+            NumericUpDownSecondEnd.Value = 0
             ignoreChangeEvents = False
 
-            If nudHourEnd.Value < 99 Then nudHourEnd.Value += 1
+            NumericUpDownMinuteEnd.Value += 1
             Exit Sub
-        ElseIf nudMinuteEnd.Value = -1 Then
+        ElseIf NumericUpDownSecondEnd.Value = -1 Then
             ignoreChangeEvents = True
-            nudMinuteEnd.Value = 59
+            NumericUpDownSecondEnd.Value = 59
             ignoreChangeEvents = False
 
-            If nudHourEnd.Value > 0 Then nudHourEnd.Value -= 1
+            NumericUpDownMinuteEnd.Value -= 1
+            Exit Sub
+        End If
+
+        If NumericUpDownMinuteEnd.Value = 60 Then
+            ignoreChangeEvents = True
+            NumericUpDownMinuteEnd.Value = 0
+            ignoreChangeEvents = False
+
+            If NumericUpDownHourEnd.Value < 99 Then NumericUpDownHourEnd.Value += 1
+            Exit Sub
+        ElseIf NumericUpDownMinuteEnd.Value = -1 Then
+            ignoreChangeEvents = True
+            NumericUpDownMinuteEnd.Value = 59
+            ignoreChangeEvents = False
+
+            If NumericUpDownHourEnd.Value > 0 Then NumericUpDownHourEnd.Value -= 1
             Exit Sub
         End If
 
         ' -----------------------
 
-        If nudMilliSecondStart.Value = 1000 Then
+        If NumericUpDownMilliSecondStart.Value = 1000 Then
             ignoreChangeEvents = True
-            nudMilliSecondStart.Value = 0
+            NumericUpDownMilliSecondStart.Value = 0
             ignoreChangeEvents = False
 
-            nudSecondStart.Value += 1
+            NumericUpDownSecondStart.Value += 1
             Exit Sub
-        ElseIf nudMilliSecondStart.Value = -1 Then
+        ElseIf NumericUpDownMilliSecondStart.Value = -1 Then
             ignoreChangeEvents = True
-            nudMilliSecondStart.Value = 999
+            NumericUpDownMilliSecondStart.Value = 999
             ignoreChangeEvents = False
 
-            nudSecondStart.Value -= 1
-            Exit Sub
-        End If
-
-        If nudSecondStart.Value = 60 Then
-            ignoreChangeEvents = True
-            nudSecondStart.Value = 0
-            ignoreChangeEvents = False
-
-            nudMinuteStart.Value += 1
-            Exit Sub
-        ElseIf nudSecondStart.Value = -1 Then
-            ignoreChangeEvents = True
-            nudSecondStart.Value = 59
-            ignoreChangeEvents = False
-
-            nudMinuteStart.Value -= 1
+            NumericUpDownSecondStart.Value -= 1
             Exit Sub
         End If
 
-        If nudMinuteStart.Value = 60 Then
+        If NumericUpDownSecondStart.Value = 60 Then
             ignoreChangeEvents = True
-            nudMinuteStart.Value = 0
+            NumericUpDownSecondStart.Value = 0
             ignoreChangeEvents = False
 
-            If nudHourStart.Value < 99 Then nudHourStart.Value += 1
+            NumericUpDownMinuteStart.Value += 1
             Exit Sub
-        ElseIf nudMinuteStart.Value = -1 Then
+        ElseIf NumericUpDownSecondStart.Value = -1 Then
             ignoreChangeEvents = True
-            nudMinuteStart.Value = 59
+            NumericUpDownSecondStart.Value = 59
             ignoreChangeEvents = False
 
-            If nudHourStart.Value > 0 Then nudHourStart.Value -= 1
+            NumericUpDownMinuteStart.Value -= 1
+            Exit Sub
+        End If
+
+        If NumericUpDownMinuteStart.Value = 60 Then
+            ignoreChangeEvents = True
+            NumericUpDownMinuteStart.Value = 0
+            ignoreChangeEvents = False
+
+            If NumericUpDownHourStart.Value < 99 Then NumericUpDownHourStart.Value += 1
+            Exit Sub
+        ElseIf NumericUpDownMinuteStart.Value = -1 Then
+            ignoreChangeEvents = True
+            NumericUpDownMinuteStart.Value = 59
+            ignoreChangeEvents = False
+
+            If NumericUpDownHourStart.Value > 0 Then NumericUpDownHourStart.Value -= 1
             Exit Sub
         End If
 
         UpdateSubtitle()
     End Sub
 
-    Private Sub TextBoxGotFocus(sender As Object, e As System.EventArgs)
+    Private Sub TextBoxGotFocus(sender As Object, e As EventArgs)
         focusedTextBox = CType(sender, TextBoxWithSpellingSupport)
     End Sub
 
@@ -285,10 +285,10 @@ Public Class SubtitlesEditor
                 Case Modes.SetLength
                     Subtitles(mSubtitleIndex).ToTimeOffsetted = StartToTimeSpan() + EndToTimeSpan()
             End Select
-            Subtitles(mSubtitleIndex).TextOffsetted = txtCurrentSubtitle.Text
+            Subtitles(mSubtitleIndex).TextOffsetted = TextBoxCurrentSubtitle.Text
 
-            If txtPreviousSubtitle.Enabled Then Subtitles(mSubtitleIndex - 1).TextOffsetted = txtPreviousSubtitle.Text
-            If txtNextSubtitle.Enabled Then Subtitles(mSubtitleIndex + 1).TextOffsetted = txtNextSubtitle.Text
+            If TextBoxPreviousSubtitle.Enabled Then Subtitles(mSubtitleIndex - 1).TextOffsetted = TextBoxPreviousSubtitle.Text
+            If TextBoxNextSubtitle.Enabled Then Subtitles(mSubtitleIndex + 1).TextOffsetted = TextBoxNextSubtitle.Text
 
             RaiseEvent SubtitleChanged(Me, New SubtitleChangedEventArgs(Subtitles(mSubtitleIndex), mSubtitleIndex))
 
@@ -298,29 +298,29 @@ Public Class SubtitlesEditor
         End If
     End Sub
 
-    Private Sub rbEnd_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles rbEnd.CheckedChanged
+    Private Sub RadioButtonEnd_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButtonEnd.CheckedChanged
         mode = Modes.SetEnd
         UpdateUI()
     End Sub
 
-    Private Sub rbLength_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles rbLength.CheckedChanged
+    Private Sub RadioButtonLength_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButtonLength.CheckedChanged
         mode = Modes.SetLength
         UpdateUI()
     End Sub
 
     Private Function StartToTimeSpan() As TimeSpan
-        Return New TimeSpan(0, nudHourStart.Value, nudMinuteStart.Value, nudSecondStart.Value, nudMilliSecondStart.Value)
+        Return New TimeSpan(0, NumericUpDownHourStart.Value, NumericUpDownMinuteStart.Value, NumericUpDownSecondStart.Value, NumericUpDownMilliSecondStart.Value)
     End Function
 
     Private Function EndToTimeSpan() As TimeSpan
-        Return New TimeSpan(0, nudHourEnd.Value, nudMinuteEnd.Value, nudSecondEnd.Value, nudMilliSecondEnd.Value)
+        Return New TimeSpan(0, NumericUpDownHourEnd.Value, NumericUpDownMinuteEnd.Value, NumericUpDownSecondEnd.Value, NumericUpDownMilliSecondEnd.Value)
     End Function
 
-    Private Sub btnBold_Click(sender As System.Object, e As System.EventArgs) Handles btnBold.Click
+    Private Sub ButtonBold_Click(sender As Object, e As EventArgs) Handles ButtonBold.Click
         ToggleTag("<b>", "</b>")
     End Sub
 
-    Private Sub btnItalic_Click(sender As System.Object, e As System.EventArgs) Handles btnItalic.Click
+    Private Sub ButtonItalic_Click(sender As Object, e As EventArgs) Handles ButtonItalic.Click
         ToggleTag("<i>", "</i>")
     End Sub
 
@@ -336,9 +336,9 @@ Public Class SubtitlesEditor
                 Dim g As Integer = Integer.Parse(hexColor.Substring(2, 2), Globalization.NumberStyles.HexNumber)
                 Dim b As Integer = Integer.Parse(hexColor.Substring(4, 2), Globalization.NumberStyles.HexNumber)
 
-                btnColor.BackColor = Color.FromArgb(r, g, b)
+                ButtonColor.BackColor = Color.FromArgb(r, g, b)
             Else
-                btnColor.BackColor = Color.White
+                ButtonColor.BackColor = Color.White
             End If
         Catch ex As Exception
             MsgBox(ex.Message, MsgBoxStyle.Critical Or MsgBoxStyle.OkOnly)
@@ -423,11 +423,11 @@ Public Class SubtitlesEditor
         Return position
     End Function
 
-    Private Sub btnColor_Click(sender As System.Object, e As System.EventArgs) Handles btnColor.Click
+    Private Sub ButtonColor_Click(sender As Object, e As EventArgs) Handles ButtonColor.Click
         Using dlg = New ColorDialog()
-            dlg.Color = btnColor.BackColor
+            dlg.Color = ButtonColor.BackColor
             If dlg.ShowDialog = Windows.Forms.DialogResult.OK Then
-                btnColor.BackColor = dlg.Color
+                ButtonColor.BackColor = dlg.Color
 
                 ToggleTag(String.Format("<font color=""#{0}{1}{2}"">",
                                         dlg.Color.R.ToString("X").PadLeft(2, "0"),
@@ -438,28 +438,28 @@ Public Class SubtitlesEditor
         End Using
     End Sub
 
-    Private Sub vsBar_Scroll(sender As System.Object, e As System.Windows.Forms.ScrollEventArgs) Handles vsBar.Scroll
-        SubtitleIndex = vsBar.Value
+    Private Sub VScrollBar_Scroll(sender As Object, e As ScrollEventArgs) Handles VScrollBarSubtitles.Scroll
+        SubtitleIndex = VScrollBarSubtitles.Value
         RaiseEvent SubtitleIndexChanged(Me, New EventArgs())
     End Sub
 
-    Private Sub SubtitlesEditor_Load(sender As Object, e As System.EventArgs) Handles Me.Load
-        focusedTextBox = txtCurrentSubtitle
+    Private Sub SubtitlesEditor_Load(sender As Object, e As EventArgs) Handles Me.Load
+        focusedTextBox = TextBoxCurrentSubtitle
 
-        AddHandler txtPreviousSubtitle.TextChanged, AddressOf UpdateSubtitle
-        AddHandler txtPreviousSubtitle.Click, AddressOf TextBoxClick
-        AddHandler txtPreviousSubtitle.GotFocus, AddressOf TextBoxGotFocus
-        AddHandler txtPreviousSubtitle.DictionaryChanged, AddressOf SetDefaultDictionary
+        AddHandler TextBoxPreviousSubtitle.TextChanged, AddressOf UpdateSubtitle
+        AddHandler TextBoxPreviousSubtitle.Click, AddressOf TextBoxClick
+        AddHandler TextBoxPreviousSubtitle.GotFocus, AddressOf TextBoxGotFocus
+        AddHandler TextBoxPreviousSubtitle.DictionaryChanged, AddressOf SetDefaultDictionary
 
-        AddHandler txtCurrentSubtitle.TextChanged, AddressOf UpdateSubtitle
-        AddHandler txtCurrentSubtitle.Click, AddressOf TextBoxClick
-        AddHandler txtCurrentSubtitle.GotFocus, AddressOf TextBoxGotFocus
-        AddHandler txtCurrentSubtitle.DictionaryChanged, AddressOf SetDefaultDictionary
+        AddHandler TextBoxCurrentSubtitle.TextChanged, AddressOf UpdateSubtitle
+        AddHandler TextBoxCurrentSubtitle.Click, AddressOf TextBoxClick
+        AddHandler TextBoxCurrentSubtitle.GotFocus, AddressOf TextBoxGotFocus
+        AddHandler TextBoxCurrentSubtitle.DictionaryChanged, AddressOf SetDefaultDictionary
 
-        AddHandler txtNextSubtitle.TextChanged, AddressOf UpdateSubtitle
-        AddHandler txtNextSubtitle.Click, AddressOf TextBoxClick
-        AddHandler txtNextSubtitle.GotFocus, AddressOf TextBoxGotFocus
-        AddHandler txtNextSubtitle.DictionaryChanged, AddressOf SetDefaultDictionary
+        AddHandler TextBoxNextSubtitle.TextChanged, AddressOf UpdateSubtitle
+        AddHandler TextBoxNextSubtitle.Click, AddressOf TextBoxClick
+        AddHandler TextBoxNextSubtitle.GotFocus, AddressOf TextBoxGotFocus
+        AddHandler TextBoxNextSubtitle.DictionaryChanged, AddressOf SetDefaultDictionary
     End Sub
 
     Private Sub SetDefaultDictionary(sender As Object, e As TextBoxWithSpellingSupport.DictionaryChangedEventArgs)

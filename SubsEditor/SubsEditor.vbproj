@@ -130,26 +130,26 @@
     <Compile Include="FlickerFreeListView.vb">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="frmFindReplace.Designer.vb">
-      <DependentUpon>frmFindReplace.vb</DependentUpon>
+    <Compile Include="FormFindReplace.Designer.vb">
+      <DependentUpon>FormFindReplace.vb</DependentUpon>
     </Compile>
-    <Compile Include="frmFindReplace.vb">
+    <Compile Include="FormFindReplace.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmMain.vb">
+    <Compile Include="FormMain.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmMain.Designer.vb">
-      <DependentUpon>frmMain.vb</DependentUpon>
+    <Compile Include="FormMain.Designer.vb">
+      <DependentUpon>FormMain.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmOptions.Designer.vb">
-      <DependentUpon>frmOptions.vb</DependentUpon>
+    <Compile Include="FormOptions.Designer.vb">
+      <DependentUpon>FormOptions.vb</DependentUpon>
     </Compile>
-    <Compile Include="frmOptions.vb">
+    <Compile Include="FormOptions.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="modGlobals.vb" />
+    <Compile Include="ModuleGlobals.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -177,15 +177,15 @@
     <EmbeddedResource Include="Controls\SubtitlesEditor.resx">
       <DependentUpon>SubtitlesEditor.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmFindReplace.resx">
-      <DependentUpon>frmFindReplace.vb</DependentUpon>
+    <EmbeddedResource Include="FormFindReplace.resx">
+      <DependentUpon>FormFindReplace.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmMain.resx">
-      <DependentUpon>frmMain.vb</DependentUpon>
+    <EmbeddedResource Include="FormMain.resx">
+      <DependentUpon>FormMain.vb</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmOptions.resx">
-      <DependentUpon>frmOptions.vb</DependentUpon>
+    <EmbeddedResource Include="FormOptions.resx">
+      <DependentUpon>FormOptions.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>

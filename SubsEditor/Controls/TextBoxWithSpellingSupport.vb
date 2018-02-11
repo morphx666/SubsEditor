@@ -1,5 +1,5 @@
 ﻿Public Class TextBoxWithSpellingSupport
-    Inherits System.Windows.Forms.TextBox
+    Inherits TextBox
 
     Private drawableTextBox As DrawableTextBox
     Private lineHeight As Integer

@@ -396,23 +396,23 @@ Public Class SubtitlesBrowser
         End If
     End Sub
 
-    Private Sub SubtitlesBrowser_DoubleClick(sender As Object, e As System.EventArgs) Handles Me.DoubleClick
+    Private Sub SubtitlesBrowser_DoubleClick(sender As Object, e As EventArgs) Handles Me.DoubleClick
         If overObject = Objects.Subtitles Then
             If subtitleSection <> SubtitleSections.None Then RaiseEvent EditSubtitle(Me, New SubtitleSelectedEventArgs(mSelectedSubtitle, subtitleChanged))
         End If
     End Sub
 
-    Private Sub SubtitlesBrowser_KeyDown(sender As Object, e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
+    Private Sub SubtitlesBrowser_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
         isShiftDown = e.Shift
         isCtrlDown = e.Control
     End Sub
 
-    Private Sub SubtitlesBrowser_KeyUp(sender As Object, e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyUp
+    Private Sub SubtitlesBrowser_KeyUp(sender As Object, e As KeyEventArgs) Handles Me.KeyUp
         isShiftDown = e.Shift
         isCtrlDown = e.Control
     End Sub
 
-    Private Sub SubtitlesBrowser_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
+    Private Sub SubtitlesBrowser_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.SetStyle(ControlStyles.AllPaintingInWmPaint, True)
         Me.SetStyle(ControlStyles.OptimizedDoubleBuffer, True)
         Me.SetStyle(ControlStyles.ResizeRedraw, True)
@@ -420,7 +420,7 @@ Public Class SubtitlesBrowser
         Me.SetStyle(ControlStyles.UserPaint, True)
     End Sub
 
-    Private Sub SubtitlesBrowser_MouseDown(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseDown
+    Private Sub SubtitlesBrowser_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
         subtitleChangedAfterMouseOperation = False
 
         If mSubtitles.Count > 0 AndAlso e.Button = Windows.Forms.MouseButtons.Left Then
@@ -442,7 +442,7 @@ Public Class SubtitlesBrowser
         End If
     End Sub
 
-    Private Sub SubtitlesBrowser_MouseMove(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
+    Private Sub SubtitlesBrowser_MouseMove(sender As Object, e As MouseEventArgs) Handles Me.MouseMove
         If isLeftMouseButtonDown Then
             Dim delta As Integer = (cursorPos.X - e.X)
             Dim factor As Double = 1000 / mZoomFactor
@@ -501,7 +501,7 @@ Public Class SubtitlesBrowser
         End If
     End Sub
 
-    Private Sub SubtitlesBrowser_MouseUp(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseUp
+    Private Sub SubtitlesBrowser_MouseUp(sender As Object, e As MouseEventArgs) Handles Me.MouseUp
         If e.Button = Windows.Forms.MouseButtons.Left Then
             isLeftMouseButtonDown = False
             Me.Cursor = Cursors.Default
@@ -529,8 +529,9 @@ Public Class SubtitlesBrowser
 
     Private Sub UpdateSubtitles(fromSubtitle As Subtitle, offset As TimeSpan)
         If offset <> TimeSpan.Zero Then
-            Dim subtitlesToUpdate As List(Of Subtitle) = New List(Of Subtitle)
-            subtitlesToUpdate.Add(fromSubtitle)
+            Dim subtitlesToUpdate As List(Of Subtitle) = New List(Of Subtitle) From {
+                fromSubtitle
+            }
 
             For i As Integer = mSubtitles.IndexOf(fromSubtitle) + 1 To Subtitles.Count - 1
                 mSubtitles(i).FromTimeOffsetted += offset
@@ -542,7 +543,7 @@ Public Class SubtitlesBrowser
         End If
     End Sub
 
-    Private Sub SubtitlesBrowser_MouseWheel(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseWheel
+    Private Sub SubtitlesBrowser_MouseWheel(sender As Object, e As MouseEventArgs) Handles Me.MouseWheel
         SetZoomFactor(mZoomFactor + e.Delta * If(isCtrlDown, 10, 2) / 100)
     End Sub
 
@@ -569,7 +570,7 @@ Public Class SubtitlesBrowser
         If lastX < 0 Then xOffset = TimeToX(mMediaDuration) + xOffset
     End Sub
 
-    Private Sub SubtitlesBrowser_Paint(sender As Object, e As System.Windows.Forms.PaintEventArgs) Handles Me.Paint
+    Private Sub SubtitlesBrowser_Paint(sender As Object, e As PaintEventArgs) Handles Me.Paint
         Dim g As Graphics = e.Graphics
         Dim r As Rectangle = Me.DisplayRectangle
         r.Inflate(-1, -1)
@@ -577,25 +578,25 @@ Public Class SubtitlesBrowser
         Dim cr As Rectangle
         Dim h As Integer = r.Height - 8
         Dim h2 As Integer = h / 2
-        Dim _subtitlesForeColor As Brush = New SolidBrush(Me.ForeColor)
+        Dim subtitlesForeColor As Brush = New SolidBrush(Me.ForeColor)
 
         g.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
         g.Clear(Me.BackColor)
 
-        Using _gridColor = New Pen(mGridColor, 2)
-            g.DrawLine(_gridColor, 0, h2, r.Width, h2)
+        Using gridColor = New Pen(mGridColor, 2)
+            g.DrawLine(gridColor, 0, h2, r.Width, h2)
         End Using
-        Using _gridColor = New Pen(mGridColor)
-            g.DrawLine(_gridColor, 0, h2 - h2 \ 2, r.Width, h2 - h2 \ 2)
-            g.DrawLine(_gridColor, 0, h2 + h2 \ 2, r.Width, h2 + h2 \ 2)
+        Using gridColor = New Pen(mGridColor)
+            g.DrawLine(gridColor, 0, h2 - h2 \ 2, r.Width, h2 - h2 \ 2)
+            g.DrawLine(gridColor, 0, h2 + h2 \ 2, r.Width, h2 + h2 \ 2)
         End Using
 
         If mSubtitles IsNot Nothing AndAlso mSubtitles.Count > 0 AndAlso mMediaDuration > TimeSpan.Zero Then
             CheckOffset()
 
             Dim selectedPoints = DrawPeaks(g, r, h, h2)
-            Dim _subtitlesBackColor As Brush
-            Dim _borderColor As Pen
+            Dim subtitlesBackColor As Brush
+            Dim borderColor As Pen
 
             Dim x1 As Integer
             Dim x2 As Integer
@@ -609,28 +610,28 @@ Public Class SubtitlesBrowser
                 cr = New Rectangle(x1, 2, x2 - x1, r.Height - 11)
 
                 If c = mSelectedSubtitle Then
-                    _subtitlesBackColor = New SolidBrush(mSubtitleSelectedBackColor)
-                    _borderColor = New Pen(Color.FromArgb(200, Color.Gray))
+                    subtitlesBackColor = New SolidBrush(mSubtitleSelectedBackColor)
+                    borderColor = New Pen(Color.FromArgb(200, Color.Gray))
                 Else
-                    _subtitlesBackColor = New SolidBrush(mSubtitleBackColor)
-                    _borderColor = New Pen(Color.FromArgb(200, Color.DarkGray))
+                    subtitlesBackColor = New SolidBrush(mSubtitleBackColor)
+                    borderColor = New Pen(Color.FromArgb(200, Color.DarkGray))
                 End If
 
-                _borderColor.DashStyle = Drawing2D.DashStyle.Dot
+                borderColor.DashStyle = Drawing2D.DashStyle.Dot
 
-                g.FillRectangle(_subtitlesBackColor, cr)
-                g.DrawString(c.TextOffsetted, Me.Font, _subtitlesForeColor, cr)
-                g.DrawRectangle(_borderColor, cr)
+                g.FillRectangle(subtitlesBackColor, cr)
+                g.DrawString(c.TextOffsetted, Me.Font, subtitlesForeColor, cr)
+                g.DrawRectangle(borderColor, cr)
 
                 subtitlesRectangles.Add(New SubtitleRectangle(c, cr))
 
-                _borderColor.Dispose()
-                _subtitlesBackColor.Dispose()
+                borderColor.Dispose()
+                subtitlesBackColor.Dispose()
             Next
 
             If selectedPoints.Length > 0 Then
-                Using _waveFormSelectedColor = New Pen(mWaveFormSelectedColor)
-                    g.DrawLines(_waveFormSelectedColor, selectedPoints)
+                Using waveFormSelectedColor = New Pen(mWaveFormSelectedColor)
+                    g.DrawLines(waveFormSelectedColor, selectedPoints)
                 End Using
             End If
 
@@ -646,8 +647,8 @@ Public Class SubtitlesBrowser
                                 w,
                                 8)
 
-            Using _positionMarkerColor = New Pen(mPositionMarkerColor, 3)
-                g.DrawLine(_positionMarkerColor, x2 - 1, r.Height - 7, x2 - 1, 0)
+            Using positionMarkerColor = New Pen(mPositionMarkerColor, 3)
+                g.DrawLine(positionMarkerColor, x2 - 1, r.Height - 7, x2 - 1, 0)
             End Using
         End If
 
@@ -655,16 +656,16 @@ Public Class SubtitlesBrowser
 
         If isCreatingNewSubtitle Then
             cr = New Rectangle(newSubtitleStartPosition, 2, newSubtitleEndPosition - newSubtitleStartPosition, r.Height - 11)
-            Using _borderColor = New Pen(Color.FromArgb(128, mGridColor), 3)
-                g.DrawRectangle(_borderColor, cr)
+            Using borderColor = New Pen(Color.FromArgb(128, mGridColor), 3)
+                g.DrawRectangle(borderColor, cr)
             End Using
-            Using _backColor = New SolidBrush(Color.FromArgb(128, mSubtitleSelectedBackColor))
-                g.FillRectangle(_backColor, cr)
+            Using backColor = New SolidBrush(Color.FromArgb(128, mSubtitleSelectedBackColor))
+                g.FillRectangle(backColor, cr)
             End Using
-            g.DrawString(My.Resources.NewSubtitleText, Me.Font, _subtitlesForeColor, cr)
+            g.DrawString(My.Resources.NewSubtitleText, Me.Font, subtitlesForeColor, cr)
         End If
 
-        _subtitlesForeColor.Dispose()
+        subtitlesForeColor.Dispose()
     End Sub
 
     Private Function DrawPeaks(g As Graphics, r As Rectangle, h As Integer, h2 As Integer) As Point()
@@ -688,8 +689,8 @@ Public Class SubtitlesBrowser
             Dim y1 As Single = h2
             Dim y2 As Single = 0
 
-            Using _waveFormColor = New Pen(mWaveFormColor)
-                Using _waveFormSelectedColor = New Pen(mWaveFormSelectedColor)
+            Using waveFormColor = New Pen(mWaveFormColor)
+                Using waveFormSelectedColor = New Pen(mWaveFormSelectedColor)
                     Do While x2 < r.Width AndAlso i < peaks.Count
                         x2 = i * mZoomFactor / peaksInterval - xOffset
                         If x2 > 0 Then
@@ -699,7 +700,7 @@ Public Class SubtitlesBrowser
                                 selectedPoints.Add(New Point(x1, y1))
                                 selectedPoints.Add(New Point(x2, y2))
                             Else
-                                g.DrawLine(_waveFormColor, x1, y1, x2, y2)
+                                g.DrawLine(waveFormColor, x1, y1, x2, y2)
                             End If
                         End If
 
@@ -730,12 +731,12 @@ Public Class SubtitlesBrowser
             labelWidth = g.MeasureString("00:00:00", mGridTimeFont, 0).Width + 20
         Loop
 
-        Using _gridColor = New Pen(mGridColor)
-            Using _gridTimeColor = New SolidBrush(mGridTimeColor)
+        Using gridColor = New Pen(mGridColor)
+            Using gridTimeColor = New SolidBrush(mGridTimeColor)
                 Do
                     x = TimeToX(t)
-                    g.DrawLine(_gridColor, x, 0, x, r.Height)
-                    g.DrawString(String.Format("{0:00}:{1:00}:{2:00}", t.Hours, t.Minutes, t.Seconds), mGridTimeFont, _gridTimeColor, x, r.Height - 24)
+                    g.DrawLine(gridColor, x, 0, x, r.Height)
+                    g.DrawString(String.Format("{0:00}:{1:00}:{2:00}", t.Hours, t.Minutes, t.Seconds), mGridTimeFont, gridTimeColor, x, r.Height - 24)
                     t += timeInterval
                 Loop Until x >= r.Width
             End Using
@@ -743,10 +744,10 @@ Public Class SubtitlesBrowser
     End Sub
 
     Private Sub DrawBackground(g As Graphics, r As Rectangle)
-        Using _gridColor = New Pen(mGridColor)
+        Using gridColor = New Pen(mGridColor)
             For i As Integer = 0 To r.Width Step 10
-                g.DrawLine(_gridColor, i, 0, i, r.Height)
-                g.DrawLine(_gridColor, 0, i, r.Width, i)
+                g.DrawLine(gridColor, i, 0, i, r.Height)
+                g.DrawLine(gridColor, 0, i, r.Width, i)
             Next
         End Using
     End Sub

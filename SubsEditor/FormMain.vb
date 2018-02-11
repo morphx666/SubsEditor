@@ -2,11 +2,11 @@
 Imports System.Threading
 Imports System.Net
 
-Public Class frmMain
+Public Class FormMain
     Private validFileTypes() As String = {".avi", ".mpg", ".mp4", ".mkv", ".mov"}
 
     Private mMediaIsValid As Boolean = False
-    Private vlcMedia As Vlc.DotNet.Core.Medias.PathMedia
+    Private vlcMedia As Medias.PathMedia
     Private videoFPS As Single
     Private isUpdatingUI As Boolean
     Private ignoreListViewSelectionEvent As Boolean
@@ -36,7 +36,7 @@ Public Class frmMain
 
     Private tmpMediaDuration As Double
 
-    Private dlgFindReplace As frmFindReplace
+    Private dlgFindReplace As FormFindReplace
     Private mLastFindResult As Subtitle
 
     Public Sub New()
@@ -47,7 +47,7 @@ Public Class frmMain
     End Sub
 
 #Region "Controls Events"
-    Private Sub frmMain_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
+    Private Sub FormMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         SetUIState(False)
 
         Me.Text = "SubsEditor " + My.Application.Info.Version.ToString()
@@ -57,68 +57,68 @@ Public Class frmMain
         checkForNewVersionThread = New Thread(AddressOf CheckForNewVersion)
         checkForNewVersionThread.Start()
 
-        seCtrl.Subtitles = subtitles
-        seCtrl.Dictionaries = dictionaries
-        sbCtrl.Subtitles = subtitles
+        SubtitlesEditorCtrl.Subtitles = subtitles
+        SubtitlesEditorCtrl.Dictionaries = dictionaries
+        SubtitlesBrowserCtrl.Subtitles = subtitles
 
         Initialize()
         LoadDictionaries()
         LoadSettings()
     End Sub
 
-    Private Sub frmMain_FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
+    Private Sub FormMain_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         SaveSettings()
 
         If checkForNewVersionThread IsNot Nothing AndAlso checkForNewVersionThread.ThreadState = ThreadState.Running Then checkForNewVersionThread.Abort()
         If Not SaveChanges(True) Then e.Cancel = True
     End Sub
 
-    Private Sub UndoToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuEditUndo.Click
+    Private Sub ToolStripMenuItemMainMenuEditUndo_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuEditUndo.Click
         MsgBox("Not Implemented", MsgBoxStyle.Information Or MsgBoxStyle.OkOnly)
     End Sub
 
-    Private Sub RedoToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuEditRedo.Click
+    Private Sub ToolStripMenuItemMainMenuEditRedo_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuEditRedo.Click
         MsgBox("Not Implemented", MsgBoxStyle.Information Or MsgBoxStyle.OkOnly)
     End Sub
 
-    Private Sub ExitToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuExit.Click
+    Private Sub ToolStripMenuItemMainMenuExit_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuExit.Click
         Me.Close()
     End Sub
 
-    Private Sub OpenSubtitleToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuOpenSubtitle.Click
+    Private Sub ToolStripMenuItemMainMenuOpenSubtitle_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuOpenSubtitle.Click
         OpenSubtitle()
     End Sub
 
-    Private Sub msMainMenuNewSubtitle_Click(sender As Object, e As EventArgs) Handles msMainMenuNewSubtitle.Click
-        If IO.File.Exists(txtVideoFile.Text) Then
-            Dim videoFile As IO.FileInfo = New IO.FileInfo(txtVideoFile.Text)
+    Private Sub ToolStripMenuItemMainMenuNewSubtitle_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuNewSubtitle.Click
+        If IO.File.Exists(TextBoxVideoFile.Text) Then
+            Dim videoFile As IO.FileInfo = New IO.FileInfo(TextBoxVideoFile.Text)
             Dim subsFile As String = videoFile.FullName.Replace(videoFile.Extension, ".srt")
             IO.File.WriteAllText(subsFile, "")
-            txtSubtitlesFile.Text = subsFile
+            TextBoxSubtitlesFile.Text = subsFile
             LoadSubtitles(subsFile)
         Else
             MsgBox("Please open a video file first", MsgBoxStyle.Information Or MsgBoxStyle.OkOnly)
         End If
     End Sub
 
-    Private Sub HandleSearchSubtitle(sender As System.Object, e As System.EventArgs) Handles txtSearch.TextChanged, btnSearch.Click
+    Private Sub HandleSearchSubtitle(sender As Object, e As EventArgs) Handles TextBoxSearch.TextChanged, ButtonSearch.Click
         Dim offset As Integer = 0
         If TypeOf sender Is Button Then offset = 1
 
         SearchSubtitle(offset)
     End Sub
 
-    Private Sub btnBrowseSubtitlesFile_Click(sender As System.Object, e As System.EventArgs) Handles btnBrowseSubtitlesFile.Click
+    Private Sub ButtonBrowseSubtitlesFile_Click(sender As Object, e As EventArgs) Handles ButtonBrowseSubtitlesFile.Click
         OpenSubtitle()
     End Sub
 
-    Private Sub msMainMenuSaveAs_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuSaveAs.Click
+    Private Sub ToolStripMenuItemMainMenuSaveAs_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuSaveAs.Click
         Using dlg = New SaveFileDialog
             dlg.Filter = "Subtitles SRT File (*.srt)|*.srt|Subtitles SUB File (*.sub)|*.sub"
             dlg.Title = "Save Subtitles File"
-            dlg.FileName = txtSubtitlesFile.Text
+            dlg.FileName = TextBoxSubtitlesFile.Text
             If dlg.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                txtSubtitlesFile.Text = dlg.FileName
+                TextBoxSubtitlesFile.Text = dlg.FileName
                 If dlg.FileName.ToLower().EndsWith(".srt") Then
                     subsFormat = SubsFormats.SRT
                 Else
@@ -129,30 +129,30 @@ Public Class frmMain
         End Using
     End Sub
 
-    Private Sub btnBrowseVideoFile_Click(sender As System.Object, e As System.EventArgs) Handles btnBrowseVideoFile.Click
+    Private Sub ButtonBrowseVideoFile_Click(sender As Object, e As EventArgs) Handles ButtonBrowseVideoFile.Click
         OpenVideo()
     End Sub
 
-    Private Sub OpenVideoToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuOpenVideo.Click
+    Private Sub ToolStripMenuItemMainMenuOpenVideo_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuOpenVideo.Click
         OpenVideo()
     End Sub
 
-    Private Sub SaveToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuSave.Click
+    Private Sub ToolStripMenuItemMainMenuSave_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuSave.Click
         SaveSubtitles()
     End Sub
 
-    Private Sub lvOffsetted_DoubleClick(sender As Object, e As System.EventArgs) Handles lvSubtitles.DoubleClick
+    Private Sub ListViewSubtitles_DoubleClick(sender As Object, e As EventArgs) Handles ListViewSubtitles.DoubleClick
         EditSubtitle()
     End Sub
 
-    Private Sub lvSubtitles_KeyUp(sender As Object, e As System.Windows.Forms.KeyEventArgs) Handles lvSubtitles.KeyUp
+    Private Sub ListViewSubtitles_KeyUp(sender As Object, e As KeyEventArgs) Handles ListViewSubtitles.KeyUp
         Select Case e.KeyCode
             Case Keys.Delete : DeleteSelectedSubtitles()
             Case Keys.Insert : AddSubtitle()
         End Select
     End Sub
 
-    Private Sub lvOffsetted_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles lvSubtitles.SelectedIndexChanged
+    Private Sub ListViewSubtitles_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ListViewSubtitles.SelectedIndexChanged
         If ignoreListViewSelectionEvent Then Exit Sub
 
         Dim c As Subtitle = GetSelectedSubtitle()
@@ -161,20 +161,20 @@ Public Class frmMain
             If mMediaIsValid Then
                 VideoPosition = c.FromTimeOffsetted
                 UpdatePositionUI()
-                If vlcCtrl.IsPlaying Then sbCtrl.CenterPosition(False)
+                If VlcCtrl.IsPlaying Then SubtitlesBrowserCtrl.CenterPosition(False)
             Else
-                sbCtrl.Position = c.FromTimeOffsetted
-                sbCtrl.CenterPosition(False)
+                SubtitlesBrowserCtrl.Position = c.FromTimeOffsetted
+                SubtitlesBrowserCtrl.CenterPosition(False)
             End If
         End If
 
         EditSubtitle()
     End Sub
 
-    Private Sub vlcCtrl_PositionChanged(sender As Vlc.DotNet.Forms.VlcControl, e As Vlc.DotNet.Core.VlcEventArgs(Of TimeSpan)) Handles vlcCtrl.TimeChanged
+    Private Sub VlcCtrl_PositionChanged(sender As Vlc.DotNet.Forms.VlcControl, e As VlcEventArgs(Of TimeSpan)) Handles VlcCtrl.TimeChanged
         UpdatePositionUI()
 
-        Dim subtitleAtPosition = sbCtrl.GetSubtitleAtPosition()
+        Dim subtitleAtPosition = SubtitlesBrowserCtrl.GetSubtitleAtPosition()
         If subtitleAtPosition IsNot Nothing Then
             ignoreListViewSelectionEvent = True
             SelectSubtitle(subtitleAtPosition)
@@ -182,102 +182,102 @@ Public Class frmMain
         End If
     End Sub
 
-    Private Sub tbPosition_ValueChanged(sender As Object, e As System.EventArgs) Handles tbPosition.ValueChanged
+    Private Sub TrackBarPosition_ValueChanged(sender As Object, e As EventArgs) Handles TrackBarPosition.ValueChanged
         If isUpdatingUI Then Exit Sub
-        VideoPosition = TimeSpan.FromMilliseconds(tbPosition.Value / 1000000 * vlcCtrl.Duration.TotalMilliseconds)
+        VideoPosition = TimeSpan.FromMilliseconds(TrackBarPosition.Value / 1000000 * VlcCtrl.Duration.TotalMilliseconds)
         UpdatePositionUI()
     End Sub
 
-    Private Sub btnPlay_Click(sender As System.Object, e As System.EventArgs) Handles btnPlay.Click
+    Private Sub ButtonPlay_Click(sender As Object, e As EventArgs) Handles ButtonPlay.Click
         TogglePlayPause()
     End Sub
 
-    Private Sub btnPlay_EnabledChanged(sender As Object, e As System.EventArgs) Handles btnPlay.EnabledChanged
-        If btnPlay.Enabled Then
-            btnPlay.Image = My.Resources.playpause_on
+    Private Sub ButtonPlay_EnabledChanged(sender As Object, e As EventArgs) Handles ButtonPlay.EnabledChanged
+        If ButtonPlay.Enabled Then
+            ButtonPlay.Image = My.Resources.playpause_on
         Else
-            btnPlay.Image = My.Resources.playpause_off
+            ButtonPlay.Image = My.Resources.playpause_off
         End If
     End Sub
 
-    Private Sub btnPlay_MouseDown(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles btnPlay.MouseDown
-        If btnPlay.Enabled Then btnPlay.Image = My.Resources.playpause_on_down
+    Private Sub ButtonPlay_MouseDown(sender As Object, e As MouseEventArgs) Handles ButtonPlay.MouseDown
+        If ButtonPlay.Enabled Then ButtonPlay.Image = My.Resources.playpause_on_down
     End Sub
 
-    Private Sub btnPlay_MouseEnter(sender As Object, e As System.EventArgs) Handles btnPlay.MouseEnter
-        If btnPlay.Enabled Then btnPlay.Image = My.Resources.playpause_on_over
+    Private Sub ButtonPlay_MouseEnter(sender As Object, e As EventArgs) Handles ButtonPlay.MouseEnter
+        If ButtonPlay.Enabled Then ButtonPlay.Image = My.Resources.playpause_on_over
     End Sub
 
-    Private Sub btnPlay_MouseLeave(sender As Object, e As System.EventArgs) Handles btnPlay.MouseLeave
-        If btnPlay.Enabled Then btnPlay.Image = My.Resources.playpause_on
+    Private Sub ButtonPlay_MouseLeave(sender As Object, e As EventArgs) Handles ButtonPlay.MouseLeave
+        If ButtonPlay.Enabled Then ButtonPlay.Image = My.Resources.playpause_on
     End Sub
 
-    Private Sub btnPlay_MouseUp(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles btnPlay.MouseUp
-        If btnPlay.Enabled Then btnPlay.Image = My.Resources.playpause_on
+    Private Sub ButtonPlay_MouseUp(sender As Object, e As MouseEventArgs) Handles ButtonPlay.MouseUp
+        If ButtonPlay.Enabled Then ButtonPlay.Image = My.Resources.playpause_on
     End Sub
 
-    Private Sub cmbLanguages_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles cmbLanguages.SelectedIndexChanged
-        vlcCtrl.AudioProperties.Track = CInt(cmbLanguages.SelectedIndex + 1)
+    Private Sub ComboBoxLanguages_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxLanguages.SelectedIndexChanged
+        VlcCtrl.AudioProperties.Track = CInt(ComboBoxLanguages.SelectedIndex + 1)
     End Sub
 
-    Private Sub btnDeleteSubtitle_Click(sender As System.Object, e As System.EventArgs) Handles btnDeleteSubtitle.Click
+    Private Sub ButtonDeleteSubtitle_Click(sender As Object, e As EventArgs) Handles ButtonDeleteSubtitle.Click
         DeleteSelectedSubtitles()
     End Sub
 
-    Private Sub sbCtrl_SubtitleChanged(sender As Object, e As SubtitlesBrowser.SubtitlesChangedEventArgs) Handles sbCtrl.SubtitlesChanged
+    Private Sub SubtitlesBrowserCtrl_SubtitleChanged(sender As Object, e As SubtitlesBrowser.SubtitlesChangedEventArgs) Handles SubtitlesBrowserCtrl.SubtitlesChanged
         UpdateSubtitles(e.Subtitles)
     End Sub
 
-    Private Sub sbCtrl_SubtitleSelected(sender As Object, e As SubtitlesBrowser.SubtitleSelectedEventArgs) Handles sbCtrl.SubtitleSelected
+    Private Sub SubtitlesBrowserCtrl_SubtitleSelected(sender As Object, e As SubtitlesBrowser.SubtitleSelectedEventArgs) Handles SubtitlesBrowserCtrl.SubtitleSelected
         SelectSubtitle(e.Subtitle)
         If e.Changed Then SaveOffsettedSubtitles(False, False)
     End Sub
 
-    Private Sub sbCtrl_PositionChanged(sender As Object, e As SubtitlesBrowser.PositionChangedEventArgs) Handles sbCtrl.PositionChanged
-        If e.Position.TotalMilliseconds >= 0 AndAlso (e.Position.TotalMilliseconds <= sbCtrl.MediaDuration.TotalMilliseconds) Then
+    Private Sub SubtitlesBrowserCtrl_PositionChanged(sender As Object, e As SubtitlesBrowser.PositionChangedEventArgs) Handles SubtitlesBrowserCtrl.PositionChanged
+        If e.Position.TotalMilliseconds >= 0 AndAlso (e.Position.TotalMilliseconds <= SubtitlesBrowserCtrl.MediaDuration.TotalMilliseconds) Then
             VideoPosition = e.Position
         End If
     End Sub
 
-    Private Sub btnAddSubtitle_Click(sender As System.Object, e As System.EventArgs) Handles btnAddSubtitle.Click
+    Private Sub ButtonAddSubtitle_Click(sender As Object, e As EventArgs) Handles ButtonAddSubtitle.Click
         AddSubtitle()
     End Sub
 
-    Private Sub btnZoomIn_Click(sender As System.Object, e As System.EventArgs) Handles btnZoomIn.Click
-        sbCtrl.ZoomFactor += 1
+    Private Sub ButtonZoomIn_Click(sender As Object, e As EventArgs) Handles ButtonZoomIn.Click
+        SubtitlesBrowserCtrl.ZoomFactor += 1
     End Sub
 
-    Private Sub btnZoomOut_Click(sender As System.Object, e As System.EventArgs) Handles btnZoomOut.Click
-        sbCtrl.ZoomFactor -= 1
+    Private Sub ButtonZoomOut_Click(sender As Object, e As EventArgs) Handles ButtonZoomOut.Click
+        SubtitlesBrowserCtrl.ZoomFactor -= 1
     End Sub
 
-    Private Sub chkRippleEdits_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles chkRippleEdits.CheckedChanged
-        Select Case chkRippleEdits.Checked
+    Private Sub CheckBoxRippleEdits_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBoxRippleEdits.CheckedChanged
+        Select Case CheckBoxRippleEdits.Checked
             Case True
-                chkRippleEdits.Image = My.Resources.lock
+                CheckBoxRippleEdits.Image = My.Resources.lock
             Case False
-                chkRippleEdits.Image = My.Resources.lock_open
+                CheckBoxRippleEdits.Image = My.Resources.lock_open
         End Select
-        sbCtrl.RippleEdits = chkRippleEdits.Checked
+        SubtitlesBrowserCtrl.RippleEdits = CheckBoxRippleEdits.Checked
     End Sub
 
-    Private Sub lnkNewVersionDownload_LinkClicked(sender As System.Object, e As System.Windows.Forms.LinkLabelLinkClickedEventArgs) Handles lnkNewVersionDownload.LinkClicked
+    Private Sub LinkLabelNewVersionDownload_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabelNewVersionDownload.LinkClicked
         DownloadUpdate()
     End Sub
 
-    Private Sub msMainMenuEditOptions_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuEditOptions.Click
-        Using f = New frmOptions()
+    Private Sub ToolStripMenuItemMainMenuEditOptions_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuEditOptions.Click
+        Using f = New FormOptions()
             f.Dictionaries = dictionaries
             f.ShowDialog()
         End Using
     End Sub
 
-    Private Sub msMainMenuEditFind_Click(sender As System.Object, e As System.EventArgs) Handles msMainMenuEditFind.Click
-        dlgFindReplace = New frmFindReplace()
+    Private Sub ToolStripMenuItemMainMenuEditFind_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItemMainMenuEditFind.Click
+        dlgFindReplace = New FormFindReplace()
 
         AddHandler dlgFindReplace.FormClosed, Sub() dlgFindReplace = Nothing
         AddHandler dlgFindReplace.SubtitleChanged, Sub(sende1 As Object, e1 As SubtitlesEditor.SubtitleChangedEventArgs)
-                                                       UpdateListViewSubtitle(lvSubtitles, e1.Subtitle, , True)
+                                                       UpdateListViewSubtitle(ListViewSubtitles, e1.Subtitle, , True)
                                                        SaveOffsettedSubtitles(False, False)
                                                    End Sub
 
@@ -311,7 +311,7 @@ Public Class frmMain
 
                 If videoFileName.Length <= subsFileName.Length AndAlso
                     subsFileName.Substring(0, videoFileName.Length) = videoFileName Then
-                    txtVideoFile.Text = file.FullName
+                    TextBoxVideoFile.Text = file.FullName
                     LoadVideo(file.FullName)
                     Exit For
                 End If
@@ -322,9 +322,9 @@ Public Class frmMain
     ' http://en.wikipedia.org/wiki/WHATWG
     Private Sub LoadSubtitles(fileName As String, Optional autoLoadVideo As Boolean = True)
         subtitles.Clear()
-        lvSubtitles.Items.Clear()
-        sbCtrl.UpdateUI(True)
-        sbCtrl.PeaksFileName = ""
+        ListViewSubtitles.Items.Clear()
+        SubtitlesBrowserCtrl.UpdateUI(True)
+        SubtitlesBrowserCtrl.PeaksFileName = ""
         SetUIState(False)
 
         If autoLoadVideo Then TryAutoLoadVideoFile(fileName)
@@ -352,19 +352,19 @@ Public Class frmMain
             MsgBox("Subtitles File Not Found", MsgBoxStyle.Critical Or MsgBoxStyle.OkOnly)
         End If
 
-        If lvSubtitles.Items.Count > 0 Then
-            lvSubtitles.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent)
+        If ListViewSubtitles.Items.Count > 0 Then
+            ListViewSubtitles.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent)
         Else
-            lvSubtitles.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize)
+            ListViewSubtitles.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize)
         End If
 
         SetUIState(True)
 
-        vlcCtrl.VideoProperties.SetSubtitleFile(txtSubtitlesFile.Text)
+        VlcCtrl.VideoProperties.SetSubtitleFile(TextBoxSubtitlesFile.Text)
         EditSubtitle()
 
-        sbCtrl.UpdateUI(True)
-        sbCtrl.Focus()
+        SubtitlesBrowserCtrl.UpdateUI(True)
+        SubtitlesBrowserCtrl.Focus()
     End Sub
 
     Private Sub LoadSUBSubTitles(lines() As String)
@@ -385,7 +385,7 @@ Public Class frmMain
 
             subtitles.Add(c)
 
-            UpdateListViewSubtitle(lvSubtitles, c)
+            UpdateListViewSubtitle(ListViewSubtitles, c)
         Next
     End Sub
 
@@ -418,26 +418,26 @@ Public Class frmMain
 
             subtitles.Add(c)
 
-            UpdateListViewSubtitle(lvSubtitles, c)
+            UpdateListViewSubtitle(ListViewSubtitles, c)
         Next
     End Sub
 
     Private Sub LoadVideo(fileName As String, Optional extractWaveForm As Boolean = True)
-        sbCtrl.Position = TimeSpan.Zero
-        btnPlay.Enabled = False
-        tbPosition.Enabled = False
-        sbCtrl.MediaDuration = TimeSpan.Zero
+        SubtitlesBrowserCtrl.Position = TimeSpan.Zero
+        ButtonPlay.Enabled = False
+        TrackBarPosition.Enabled = False
+        SubtitlesBrowserCtrl.MediaDuration = TimeSpan.Zero
         mMediaIsValid = False
         videoFPS = 23.976215
 
         If fileName <> "" AndAlso IO.File.Exists(fileName) Then
-            If vlcCtrl.IsPlaying Then vlcCtrl.Stop()
+            If VlcCtrl.IsPlaying Then VlcCtrl.Stop()
 
-            vlcCtrl.Media?.Dispose()
+            VlcCtrl.Media?.Dispose()
 
             vlcMedia = New Medias.PathMedia(fileName)
-            vlcCtrl.Media = vlcMedia
-            vlcCtrl.Play()
+            VlcCtrl.Media = vlcMedia
+            VlcCtrl.Play()
 
             Do
                 Application.DoEvents()
@@ -447,34 +447,34 @@ Public Class frmMain
             If vlcMedia.State = Interops.Signatures.LibVlc.Media.States.Error Then Exit Sub
 
             VideoPosition = TimeSpan.Zero
-            vlcCtrl.Pause()
+            VlcCtrl.Pause()
 
-            cmbLanguages.Items.Clear()
-            For i = 1 To vlcCtrl.AudioProperties.TrackCount - 1
-                cmbLanguages.Items.Add("Track " + i.ToString())
+            ComboBoxLanguages.Items.Clear()
+            For i = 1 To VlcCtrl.AudioProperties.TrackCount - 1
+                ComboBoxLanguages.Items.Add("Track " + i.ToString())
             Next
-            If cmbLanguages.Items.Count > 0 Then
-                cmbLanguages.Enabled = True
-                cmbLanguages.SelectedIndex = 0
+            If ComboBoxLanguages.Items.Count > 0 Then
+                ComboBoxLanguages.Enabled = True
+                ComboBoxLanguages.SelectedIndex = 0
             Else
-                cmbLanguages.Enabled = False
+                ComboBoxLanguages.Enabled = False
             End If
 
-            btnPlay.Enabled = True
-            tbPosition.Enabled = True
+            ButtonPlay.Enabled = True
+            TrackBarPosition.Enabled = True
 
-            sbCtrl.MediaDuration = vlcCtrl.Duration
+            SubtitlesBrowserCtrl.MediaDuration = VlcCtrl.Duration
             mMediaIsValid = True
 
-            videoFPS = vlcCtrl.FPS
+            videoFPS = VlcCtrl.FPS
 
             If extractWaveForm Then
                 StopExtractingAudio()
 
-                tmpMediaDuration = vlcCtrl.Duration.TotalSeconds
+                tmpMediaDuration = VlcCtrl.Duration.TotalSeconds
 
-                vlcCtrl.Stop()
-                vlcCtrl.Media.Dispose()
+                VlcCtrl.Stop()
+                VlcCtrl.Media.Dispose()
                 vlcMedia.Dispose()
 
                 extractAudioThread = New Thread(AddressOf ExtractAudio)
@@ -497,34 +497,34 @@ Public Class frmMain
 
             extractAudioThread = Nothing
         End If
-        lblExtractingAWF.Visible = False
+        LabelExtractingAWF.Visible = False
         cancelExtractAudio = False
     End Sub
 
     Private Sub ExtractAudio()
         Dim UpdateProgressLabel = Sub(audioFileSize As Long, mediaDuration As Long)
                                       Me.Invoke(New MethodInvoker(Sub()
-                                                                      lblExtractingAWF.Visible = (audioFileSize <> 0)
+                                                                      LabelExtractingAWF.Visible = (audioFileSize <> 0)
                                                                       Select Case audioFileSize
                                                                           Case -1
-                                                                              lblExtractingAWF.Visible = True
-                                                                              lblExtractingAWF.Text = "Extracting Waveform..."
+                                                                              LabelExtractingAWF.Visible = True
+                                                                              LabelExtractingAWF.Text = "Extracting Waveform..."
                                                                           Case -2
-                                                                              lblExtractingAWF.Visible = True
-                                                                              lblExtractingAWF.Text = "Generating Waveform..."
+                                                                              LabelExtractingAWF.Visible = True
+                                                                              LabelExtractingAWF.Text = "Generating Waveform..."
                                                                           Case -3
-                                                                              lblExtractingAWF.Visible = True
-                                                                              lblExtractingAWF.Text = "Loading Waveform..."
+                                                                              LabelExtractingAWF.Visible = True
+                                                                              LabelExtractingAWF.Text = "Loading Waveform..."
                                                                           Case Is > 0
-                                                                              lblExtractingAWF.Visible = True
-                                                                              lblExtractingAWF.Text = String.Format("Extracting Audio Waveform: {0:F2}%", audioFileSize / mediaDuration * 100)
+                                                                              LabelExtractingAWF.Visible = True
+                                                                              LabelExtractingAWF.Text = String.Format("Extracting Audio Waveform: {0:F2}%", audioFileSize / mediaDuration * 100)
                                                                       End Select
                                                                   End Sub))
                                   End Sub
 
         UpdateProgressLabel(-1, 0)
 
-        Dim videoFile = New IO.FileInfo(txtVideoFile.Text)
+        Dim videoFile = New IO.FileInfo(TextBoxVideoFile.Text)
         Dim vlcFileName As String = IO.Path.Combine(VlcContext.LibVlcDllsPath, "vlc.exe")
         Dim audioFile = New IO.FileInfo(IO.Path.Combine(videoFile.DirectoryName, "audiowf.wav"))
         Dim peaksFile = New IO.FileInfo(IO.Path.Combine(videoFile.DirectoryName, "peaks.sep"))
@@ -547,8 +547,9 @@ Public Class frmMain
 
                 Dim stream = New IO.FileStream(audioFile.FullName, IO.FileMode.Create, IO.FileAccess.ReadWrite, IO.FileShare.ReadWrite)
 
-                Dim vlcProcess = New Process()
-                vlcProcess.StartInfo = New ProcessStartInfo(vlcFileName, parameters)
+                Dim vlcProcess = New Process With {
+                    .StartInfo = New ProcessStartInfo(vlcFileName, parameters)
+                }
                 vlcProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden
                 vlcProcess.Start()
 
@@ -575,7 +576,7 @@ Public Class frmMain
             End If
 
             UpdateProgressLabel(-2, 0)
-            If wr Is Nothing Then wr = New WavReader(audioFile.FullName) ' FIXME: This has stopped working...
+            If wr Is Nothing Then wr = New WavReader(audioFile.FullName)
             wr.SavePeaks(peaksFile.FullName)
             wr.Dispose()
             Try
@@ -586,20 +587,20 @@ Public Class frmMain
 
         If Not cancelExtractAudio Then
             UpdateProgressLabel(-3, 0)
-            sbCtrl.PeaksFileName = peaksFile.FullName
+            SubtitlesBrowserCtrl.PeaksFileName = peaksFile.FullName
         End If
         UpdateProgressLabel(0, 0)
     End Sub
 
     Private Sub SelectSubtitle(subtitle As Subtitle)
         If subtitle IsNot Nothing Then
-            UpdateListViewSubtitle(lvSubtitles, subtitle, True)
+            UpdateListViewSubtitle(ListViewSubtitles, subtitle, True)
             EditSubtitle()
         End If
     End Sub
 
     Public Sub UpdateListViewSubtitle(lv As ListView, c As Subtitle, Optional selectIt As Boolean = False, Optional autoResizeColumns As Boolean = False)
-        Dim isOffsetted As Boolean = (lv.Name = lvSubtitles.Name)
+        Dim isOffsetted As Boolean = (lv.Name = ListViewSubtitles.Name)
 
         If lv.Items.Count >= c.Index Then
             With lv.Items(c.Index - 1)
@@ -647,7 +648,7 @@ Public Class frmMain
 
     Private Sub UpdateSubtitles(subtitles As List(Of Subtitle))
         For Each c In subtitles
-            UpdateListViewSubtitle(lvSubtitles, c)
+            UpdateListViewSubtitle(ListViewSubtitles, c)
         Next
 
         SaveOffsettedSubtitles(False, False)
@@ -655,7 +656,7 @@ Public Class frmMain
 
     Public Sub SaveOffsettedSubtitles(applyChanges As Boolean, isClosing As Boolean)
         Dim tmpFile As String = GetTempFile()
-        Dim oldPosition As Integer = tbPosition.Value
+        Dim oldPosition As Integer = TrackBarPosition.Value
         Dim subtitleIndex As Integer = 0
         If GetSelectedSubtitle() IsNot Nothing Then subtitleIndex = GetSelectedSubtitle().Index
 
@@ -666,7 +667,7 @@ Public Class frmMain
                 UnloadVLCMedia()
                 IO.File.Delete(tmpFile)
             End If
-            tmpFile = txtSubtitlesFile.Text
+            tmpFile = TextBoxSubtitlesFile.Text
         End If
 
         Dim w As IO.StreamWriter = New IO.StreamWriter(tmpFile, False, System.Text.Encoding.UTF8)
@@ -685,19 +686,19 @@ Public Class frmMain
         w.Close()
 
         If Not isClosing Then
-            Dim mediaDuration = sbCtrl.MediaDuration
-            If applyChanges Then LoadSubtitles(txtSubtitlesFile.Text)
-            sbCtrl.UpdateUI(False)
+            Dim mediaDuration = SubtitlesBrowserCtrl.MediaDuration
+            If applyChanges Then LoadSubtitles(TextBoxSubtitlesFile.Text)
+            SubtitlesBrowserCtrl.UpdateUI(False)
 
             If mMediaIsValid Then
                 ' Workaround to solve the problem when VLC does not support any additional subtitle files.
                 ' The only way (so far) to empty the list of added subtitle files is to re-load the video.
-                If applyChanges OrElse vlcCtrl.VideoProperties.SpuCount > 70 Then
-                    LoadVideo(txtVideoFile.Text)
+                If applyChanges OrElse VlcCtrl.VideoProperties.SpuCount > 70 Then
+                    LoadVideo(TextBoxVideoFile.Text)
 
-                    tbPosition.Value = oldPosition
+                    TrackBarPosition.Value = oldPosition
                     If subtitleIndex > 0 Then
-                        With lvSubtitles.Items(subtitleIndex - 1)
+                        With ListViewSubtitles.Items(subtitleIndex - 1)
                             .Selected = True
                             .EnsureVisible()
                         End With
@@ -705,8 +706,8 @@ Public Class frmMain
                     End If
                 End If
 
-                vlcCtrl.VideoProperties.SetSubtitleFile(tmpFile)
-                sbCtrl.MediaDuration = mediaDuration
+                VlcCtrl.VideoProperties.SetSubtitleFile(tmpFile)
+                SubtitlesBrowserCtrl.MediaDuration = mediaDuration
             End If
 
             EditSubtitle()
@@ -714,17 +715,17 @@ Public Class frmMain
     End Sub
 
     Private Sub UnloadVLCMedia()
-        If mMediaIsValid Then vlcCtrl.Stop()
+        If mMediaIsValid Then VlcCtrl.Stop()
         'Dim media = New Medias.EmptyMedia("")
         'vlcCtrl.Media = media
-        vlcCtrl.Medias.Clear()
+        VlcCtrl.Medias.Clear()
     End Sub
 
     Private Function GetTempFile() As String
         Dim result As String = ""
         Try
-            If txtSubtitlesFile.Text <> "" Then
-                Dim file As IO.FileInfo = New IO.FileInfo(txtSubtitlesFile.Text)
+            If TextBoxSubtitlesFile.Text <> "" Then
+                Dim file As IO.FileInfo = New IO.FileInfo(TextBoxSubtitlesFile.Text)
                 Dim path As String = file.DirectoryName
                 Dim newName As String = file.Name.Replace(file.Extension, "") + ".Offsetted" + file.Extension
                 result = IO.Path.Combine(path, newName)
@@ -740,21 +741,21 @@ Public Class frmMain
 
         Dim time = VideoPosition
 
-        If sbCtrl.MediaDuration.TotalMilliseconds > 0 Then
+        If SubtitlesBrowserCtrl.MediaDuration.TotalMilliseconds > 0 Then
             Try
-                tbPosition.Value = time.TotalMilliseconds / sbCtrl.MediaDuration.TotalMilliseconds * tbPosition.Maximum
+                TrackBarPosition.Value = time.TotalMilliseconds / SubtitlesBrowserCtrl.MediaDuration.TotalMilliseconds * TrackBarPosition.Maximum
             Catch ex As Exception
-                tbPosition.Value = 0
+                TrackBarPosition.Value = 0
             End Try
         End If
-        lblTime.Text = String.Format("{0:00}:{1:00}:{2:00},{3:000}",
+        LabelTime.Text = String.Format("{0:00}:{1:00}:{2:00},{3:000}",
                                     time.Hours,
                                     time.Minutes,
                                     time.Seconds,
                                     time.Milliseconds)
 
-        sbCtrl.Position = time
-        sbCtrl.CenterPosition(mMediaIsValid AndAlso vlcCtrl.IsPlaying)
+        SubtitlesBrowserCtrl.Position = time
+        SubtitlesBrowserCtrl.CenterPosition(mMediaIsValid AndAlso VlcCtrl.IsPlaying)
 
         isUpdatingUI = False
     End Sub
@@ -762,24 +763,24 @@ Public Class frmMain
     Private Property VideoPosition As TimeSpan
         Get
             If mMediaIsValid Then
-                If vlcCtrl.IsPlaying Then
-                    Return vlcCtrl.Time
+                If VlcCtrl.IsPlaying Then
+                    Return VlcCtrl.Time
                 Else
-                    Return TimeSpan.FromMilliseconds(vlcCtrl.Position * vlcCtrl.Duration.TotalMilliseconds)
+                    Return TimeSpan.FromMilliseconds(VlcCtrl.Position * VlcCtrl.Duration.TotalMilliseconds)
                 End If
             Else
-                Return sbCtrl.Position
+                Return SubtitlesBrowserCtrl.Position
             End If
         End Get
         Set(value As TimeSpan)
             If mMediaIsValid Then
-                If vlcCtrl.IsPlaying AndAlso vlcCtrl.Time <> value Then
-                    vlcCtrl.Time = value
+                If VlcCtrl.IsPlaying AndAlso VlcCtrl.Time <> value Then
+                    VlcCtrl.Time = value
                 Else
-                    vlcCtrl.Position = value.TotalMilliseconds / vlcCtrl.Duration.TotalMilliseconds
+                    VlcCtrl.Position = value.TotalMilliseconds / VlcCtrl.Duration.TotalMilliseconds
                 End If
             Else
-                sbCtrl.Position = value
+                SubtitlesBrowserCtrl.Position = value
             End If
 
             UpdatePositionUI()
@@ -790,16 +791,16 @@ Public Class frmMain
         Dim c As Subtitle = GetSelectedSubtitle()
 
         If c Is Nothing Then
-            seCtrl.SubtitleIndex = -1
+            SubtitlesEditorCtrl.SubtitleIndex = -1
         Else
-            seCtrl.SubtitleIndex = c.Index - 1
+            SubtitlesEditorCtrl.SubtitleIndex = c.Index - 1
         End If
-        sbCtrl.SelectedSubtitle = c
+        SubtitlesBrowserCtrl.SelectedSubtitle = c
     End Sub
 
     Private Function GetSelectedSubtitle() As Subtitle
-        If lvSubtitles.SelectedItems.Count = 1 Then
-            Return subtitles(lvSubtitles.SelectedIndices(0))
+        If ListViewSubtitles.SelectedItems.Count = 1 Then
+            Return subtitles(ListViewSubtitles.SelectedIndices(0))
         Else
             Return Nothing
         End If
@@ -810,35 +811,35 @@ Public Class frmMain
         Dim selectedSubtitle As Subtitle = GetSelectedSubtitle()
 
         Dim previousSubtitle As Subtitle = Nothing
-        Dim previousSubtitles = From c In subtitles Select c Where c.ToTimeOffsetted < sbCtrl.Position
+        Dim previousSubtitles = From c In subtitles Select c Where c.ToTimeOffsetted < SubtitlesBrowserCtrl.Position
         If previousSubtitles.Count > 0 Then previousSubtitle = previousSubtitles.Last()
         Dim index = If(previousSubtitle Is Nothing, 1, previousSubtitle.Index + 1)
         newSubtitle = New Subtitle(index,
-                                    sbCtrl.Position,
-                                    sbCtrl.Position + TimeSpan.FromSeconds(3),
+                                    SubtitlesBrowserCtrl.Position,
+                                    SubtitlesBrowserCtrl.Position + TimeSpan.FromSeconds(3),
                                     My.Resources.NewSubtitleText)
 
         For i As Integer = newSubtitle.Index - 1 To subtitles.Count - 1
             subtitles(i).Index += 1
         Next
         subtitles.Insert(newSubtitle.Index - 1, newSubtitle)
-        With lvSubtitles.Items.Insert(newSubtitle.Index - 1, "").SubItems
+        With ListViewSubtitles.Items.Insert(newSubtitle.Index - 1, "").SubItems
             .Add("")
             .Add("")
         End With
-        UpdateListViewSubtitle(lvSubtitles, newSubtitle, True, True)
+        UpdateListViewSubtitle(ListViewSubtitles, newSubtitle, True, True)
         EditSubtitle()
 
         Return newSubtitle
     End Function
 
     Private Sub SetUIState(state As Boolean)
-        btnAddSubtitle.Enabled = state
-        btnDeleteSubtitle.Enabled = state
-        chkRippleEdits.Enabled = state
-        sbCtrl.Enabled = state
-        txtSearch.Enabled = state
-        btnSearch.Enabled = state
+        ButtonAddSubtitle.Enabled = state
+        ButtonDeleteSubtitle.Enabled = state
+        CheckBoxRippleEdits.Enabled = state
+        SubtitlesBrowserCtrl.Enabled = state
+        TextBoxSearch.Enabled = state
+        ButtonSearch.Enabled = state
     End Sub
 
     Private Sub CheckForNewVersion()
@@ -865,9 +866,9 @@ Public Class frmMain
                     'End If
 
                     Me.Invoke(New MethodInvoker(Sub()
-                                                    lnkNewVersionDownload.Text = "Download SubsEditor " + latestVersion.ToString()
-                                                    lnkNewVersionDownload.Visible = True
-                                                    lblNewVersionInfo.Visible = True
+                                                    LinkLabelNewVersionDownload.Text = "Download SubsEditor " + latestVersion.ToString()
+                                                    LinkLabelNewVersionDownload.Visible = True
+                                                    LabelNewVersionInfo.Visible = True
                                                 End Sub))
                 End If
             End If
@@ -876,11 +877,11 @@ Public Class frmMain
     End Sub
 
     Private Sub DownloadUpdate()
-        lnkNewVersionDownload.Visible = False
-        lblNewVersionInfo.Visible = False
+        LinkLabelNewVersionDownload.Visible = False
+        LabelNewVersionInfo.Visible = False
 
-        lblDownloading.Visible = True
-        pbDownload.Visible = True
+        LabelDownloading.Visible = True
+        ProgressBarDownload.Visible = True
 
         Dim wc = New WebClient()
         Dim setupFile As String = ""
@@ -895,7 +896,7 @@ Public Class frmMain
 
         wc = New WebClient()
         AddHandler wc.DownloadProgressChanged, Sub(sender As Object, e As DownloadProgressChangedEventArgs)
-                                                   Me.Invoke(New MethodInvoker(Sub() pbDownload.Value = e.ProgressPercentage))
+                                                   Me.Invoke(New MethodInvoker(Sub() ProgressBarDownload.Value = e.ProgressPercentage))
                                                End Sub
 
         AddHandler wc.DownloadDataCompleted, Sub(sender As Object, e As DownloadDataCompletedEventArgs)
@@ -932,7 +933,7 @@ Public Class frmMain
 
     Private Function SaveChanges(isClosing As Boolean) As Boolean
         StopExtractingAudio()
-        If vlcCtrl.IsPlaying Then vlcCtrl.Stop()
+        If VlcCtrl.IsPlaying Then VlcCtrl.Stop()
 
         Dim tmpFile As String = GetTempFile()
         If IO.File.Exists(tmpFile) Then
@@ -956,7 +957,7 @@ Public Class frmMain
     ' http://www.colourlovers.com
     Private Sub SetSubtitlesBrowserColors()
         '' Plumb Theme
-        With sbCtrl
+        With SubtitlesBrowserCtrl
             .Font = New Font(Me.Font.FontFamily, 10, FontStyle.Regular, GraphicsUnit.Pixel)
 
             .ForeColor = Color.FromArgb(223, 210, 181)
@@ -1035,7 +1036,7 @@ Public Class frmMain
         Static isFirstTime = True
         If isFirstTime Then
             isFirstTime = False
-            AddHandler sbCtrl.MouseClick, Sub(sender As Object, e As MouseEventArgs)
+            AddHandler SubtitlesBrowserCtrl.MouseClick, Sub(sender As Object, e As MouseEventArgs)
                                               If e.Button = Windows.Forms.MouseButtons.Right Then
                                                   SetSubtitlesBrowserColors()
                                               End If
@@ -1045,41 +1046,41 @@ Public Class frmMain
 
     Private Sub TogglePlayPause()
         If mMediaIsValid Then
-            If vlcCtrl.IsPlaying Then
-                vlcCtrl.Pause()
+            If VlcCtrl.IsPlaying Then
+                VlcCtrl.Pause()
             Else
-                vlcCtrl.Play()
+                VlcCtrl.Play()
             End If
             ' FIXME: Freaking VLC seems to change the Duration at will... so we update it every time we start playing
-            sbCtrl.MediaDuration = vlcCtrl.Duration
+            SubtitlesBrowserCtrl.MediaDuration = VlcCtrl.Duration
         End If
     End Sub
 
     Private Sub Initialize()
-        AddHandler sbCtrl.ZoomFactorChanged, Sub() tbZoom.Value = sbCtrl.ZoomFactor
-        AddHandler sbCtrl.CreateNewSubtitle, Sub(sender As Object, e As SubtitlesBrowser.CreateNewSubtitleEventArgs)
+        AddHandler SubtitlesBrowserCtrl.ZoomFactorChanged, Sub() TrackBarZoom.Value = SubtitlesBrowserCtrl.ZoomFactor
+        AddHandler SubtitlesBrowserCtrl.CreateNewSubtitle, Sub(sender As Object, e As SubtitlesBrowser.CreateNewSubtitleEventArgs)
                                                  Dim newSubtitle = AddSubtitle()
                                                  newSubtitle.FromTimeOffsetted = e.StartTime
                                                  newSubtitle.ToTimeOffsetted = e.EndTime
                                              End Sub
-        AddHandler sbCtrl.EditSubtitle, Sub(sender As Object, e As SubtitlesBrowser.SubtitleSelectedEventArgs) EditSubtitle()
-        AddHandler tbZoom.Scroll, Sub() sbCtrl.ZoomFactor = Math.Min(tbZoom.Value, tbZoom.Maximum)
-        AddHandler seCtrl.SubtitleIndexChanged, Sub()
-                                                    With lvSubtitles.Items(seCtrl.SubtitleIndex)
+        AddHandler SubtitlesBrowserCtrl.EditSubtitle, Sub(sender As Object, e As SubtitlesBrowser.SubtitleSelectedEventArgs) EditSubtitle()
+        AddHandler TrackBarZoom.Scroll, Sub() SubtitlesBrowserCtrl.ZoomFactor = Math.Min(TrackBarZoom.Value, TrackBarZoom.Maximum)
+        AddHandler SubtitlesEditorCtrl.SubtitleIndexChanged, Sub()
+                                                    With ListViewSubtitles.Items(SubtitlesEditorCtrl.SubtitleIndex)
                                                         .Selected = True
                                                         .EnsureVisible()
                                                     End With
                                                 End Sub
-        AddHandler seCtrl.SubtitleChanged, Sub(sender As Object, e As SubtitlesEditor.SubtitleChangedEventArgs)
-                                               UpdateListViewSubtitle(lvSubtitles, e.Subtitle, , True)
+        AddHandler SubtitlesEditorCtrl.SubtitleChanged, Sub(sender As Object, e As SubtitlesEditor.SubtitleChangedEventArgs)
+                                               UpdateListViewSubtitle(ListViewSubtitles, e.Subtitle, , True)
                                                SaveOffsettedSubtitles(False, False)
                                            End Sub
 
         AddHandler dictionaries.DefaultDictionaryChanged, Sub()
-                                                              seCtrl.SpellCheckerEngine = dictionaries.GetSpellingEngine()
+                                                              SubtitlesEditorCtrl.SpellCheckerEngine = dictionaries.GetSpellingEngine()
                                                           End Sub
 
-        sbCtrl.ZoomFactor = 100
+        SubtitlesBrowserCtrl.ZoomFactor = 100
         SetSubtitlesBrowserColors()
 
         If Not IO.Directory.Exists(Dictionary.DictionariesFolder) Then IO.Directory.CreateDirectory(Dictionary.DictionariesFolder)
@@ -1095,15 +1096,15 @@ Public Class frmMain
         data = <settings>
                    <mainWindow>
                        <main state=<%= Me.WindowState %> location=<%= Me.Location %> size=<%= Me.Size %>/>
-                       <splitMain distance=<%= scMain.SplitterDistance %>/>
-                       <splitSubtitlesAndEditor distance=<%= scSubtitlesAndEditor.SplitterDistance %>/>
-                       <splitVideoAndBrowser distance=<%= scVideoAndBrowser.SplitterDistance %>/>
+                       <splitMain distance=<%= SplitContainerMain.SplitterDistance %>/>
+                       <splitSubtitlesAndEditor distance=<%= SplitContainerSubtitlesAndEditor.SplitterDistance %>/>
+                       <splitVideoAndBrowser distance=<%= SplitContainerVideoAndBrowser.SplitterDistance %>/>
                    </mainWindow>
                    <project>
-                       <subtitles fileName=<%= txtSubtitlesFile.Text %>/>
-                       <video fileName=<%= txtVideoFile.Text %>/>
-                       <browser position=<%= VideoPosition.TotalMilliseconds %> zoom=<%= sbCtrl.ZoomFactor %> rippeEdits=<%= sbCtrl.RippleEdits %>/>
-                       <editor index=<%= seCtrl.SubtitleIndex %>/>
+                       <subtitles fileName=<%= TextBoxSubtitlesFile.Text %>/>
+                       <video fileName=<%= TextBoxVideoFile.Text %>/>
+                       <browser position=<%= VideoPosition.TotalMilliseconds %> zoom=<%= SubtitlesBrowserCtrl.ZoomFactor %> rippeEdits=<%= SubtitlesBrowserCtrl.RippleEdits %>/>
+                       <editor index=<%= SubtitlesEditorCtrl.SubtitleIndex %>/>
                    </project>
                    <defaultDictionary id=<%= defDictID %> locale=<%= defDictLocale %>/>
                </settings>
@@ -1126,28 +1127,28 @@ Public Class frmMain
             Catch
             End Try
 
-            scMain.SplitterDistance = Integer.Parse(xmlSettings.<settings>.<mainWindow>.<splitMain>.@distance)
-            scSubtitlesAndEditor.SplitterDistance = Integer.Parse(xmlSettings.<settings>.<mainWindow>.<splitSubtitlesAndEditor>.@distance)
-            scVideoAndBrowser.SplitterDistance = Integer.Parse(xmlSettings.<settings>.<mainWindow>.<splitVideoAndBrowser>.@distance)
+            SplitContainerMain.SplitterDistance = Integer.Parse(xmlSettings.<settings>.<mainWindow>.<splitMain>.@distance)
+            SplitContainerSubtitlesAndEditor.SplitterDistance = Integer.Parse(xmlSettings.<settings>.<mainWindow>.<splitSubtitlesAndEditor>.@distance)
+            SplitContainerVideoAndBrowser.SplitterDistance = Integer.Parse(xmlSettings.<settings>.<mainWindow>.<splitVideoAndBrowser>.@distance)
 
-            txtVideoFile.Text = xmlSettings.<settings>.<project>.<video>.@fileName
-            txtSubtitlesFile.Text = xmlSettings.<settings>.<project>.<subtitles>.@fileName
+            TextBoxVideoFile.Text = xmlSettings.<settings>.<project>.<video>.@fileName
+            TextBoxSubtitlesFile.Text = xmlSettings.<settings>.<project>.<subtitles>.@fileName
 
-            LoadVideo(txtVideoFile.Text)
-            LoadSubtitles(txtSubtitlesFile.Text, False)
+            LoadVideo(TextBoxVideoFile.Text)
+            LoadSubtitles(TextBoxSubtitlesFile.Text, False)
 
             Application.DoEvents()
 
-            seCtrl.SubtitleIndex = xmlSettings.<settings>.<project>.<editor>.@index
-            If seCtrl.SubtitleIndex <> -1 Then SelectSubtitle(subtitles(seCtrl.SubtitleIndex))
-            sbCtrl.ZoomFactor = xmlSettings.<settings>.<project>.<browser>.@zoom
-            sbCtrl.RippleEdits = StringToBoolean(xmlSettings.<settings>.<project>.<browser>.@zoom)
+            SubtitlesEditorCtrl.SubtitleIndex = xmlSettings.<settings>.<project>.<editor>.@index
+            If SubtitlesEditorCtrl.SubtitleIndex <> -1 Then SelectSubtitle(subtitles(SubtitlesEditorCtrl.SubtitleIndex))
+            SubtitlesBrowserCtrl.ZoomFactor = xmlSettings.<settings>.<project>.<browser>.@zoom
+            SubtitlesBrowserCtrl.RippleEdits = StringToBoolean(xmlSettings.<settings>.<project>.<browser>.@zoom)
             VideoPosition = TimeSpan.FromMilliseconds(xmlSettings.<settings>.<project>.<browser>.@position)
 
             dictionaries.SetDefault(xmlSettings.<settings>.<defaultDictionary>.@id, xmlSettings.<settings>.<defaultDictionary>.@locale)
         End If
 
-        sbCtrl.Focus()
+        SubtitlesBrowserCtrl.Focus()
     End Sub
 
     Private Sub OpenSubtitle()
@@ -1156,8 +1157,8 @@ Public Class frmMain
                 dlg.Filter = "Subtitles File (*.srt;*.sub)|*.srt;*.sub"
                 dlg.Title = "Select Subtitles File"
                 If dlg.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                    txtSubtitlesFile.Text = dlg.FileName
-                    LoadSubtitles(txtSubtitlesFile.Text)
+                    TextBoxSubtitlesFile.Text = dlg.FileName
+                    LoadSubtitles(TextBoxSubtitlesFile.Text)
                 End If
             End Using
         End If
@@ -1168,7 +1169,7 @@ Public Class frmMain
             dlg.Filter = "Video Files|" + String.Join(";", validFileTypes).Replace(".", "*.") + "|All Files|*.*"
             dlg.Title = "Select Video File"
             If dlg.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                txtVideoFile.Text = dlg.FileName
+                TextBoxVideoFile.Text = dlg.FileName
                 LoadVideo(dlg.FileName)
             End If
         End Using
@@ -1188,30 +1189,30 @@ Public Class frmMain
     End Sub
 
     Private Sub AddEventHandlers()
-        AddHandler sbCtrl.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
-        AddHandler vlcCtrl.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
-        AddHandler btnPlay.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
-        AddHandler lvSubtitles.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
+        AddHandler SubtitlesBrowserCtrl.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
+        AddHandler VlcCtrl.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
+        AddHandler ButtonPlay.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
+        AddHandler ListViewSubtitles.KeyDown, Sub(sender As Object, e As KeyEventArgs) If e.KeyCode = Keys.Space Then TogglePlayPause()
     End Sub
 
     Public Sub SearchSubtitle(offset As Integer)
-        txtSearch.BackColor = Color.FromKnownColor(KnownColor.Window)
-        txtSearch.ForeColor = Color.FromKnownColor(KnownColor.WindowText)
+        TextBoxSearch.BackColor = Color.FromKnownColor(KnownColor.Window)
+        TextBoxSearch.ForeColor = Color.FromKnownColor(KnownColor.WindowText)
 
-        If txtSearch.Text = "" Then
+        If TextBoxSearch.Text = "" Then
             mLastFindResult = Nothing
             Exit Sub
         End If
 
         Dim startIndex As Integer = 0
-        If lvSubtitles.SelectedItems.Count > 0 Then
+        If ListViewSubtitles.SelectedItems.Count > 0 Then
             startIndex = GetLastSelectedIndex() + offset
-            If startIndex = lvSubtitles.Items.Count Then startIndex = 0
+            If startIndex = ListViewSubtitles.Items.Count Then startIndex = 0
         End If
 
-        Dim filter As String = If(mSearchMode And SearchOptions.MatchCase = SearchOptions.MatchCase, txtSearch.Text, txtSearch.Text.ToLower())
+        Dim filter As String = If(mSearchMode And SearchOptions.MatchCase = SearchOptions.MatchCase, TextBoxSearch.Text, TextBoxSearch.Text.ToLower())
         Dim match As ListViewItem = Nothing
-        If lvSubtitles.Items.Count > 0 Then
+        If ListViewSubtitles.Items.Count > 0 Then
             Do
                 For i As Integer = startIndex To subtitles.Count - 1
                     Dim subtitleText = subtitles(i).TextOffsetted
@@ -1240,7 +1241,7 @@ Public Class frmMain
                     End If
 
                     If isMatch Then
-                        match = lvSubtitles.Items(i)
+                        match = ListViewSubtitles.Items(i)
                         Exit For
                     End If
                 Next
@@ -1250,8 +1251,8 @@ Public Class frmMain
         End If
 
         If match Is Nothing Then
-            txtSearch.BackColor = Color.DarkRed
-            txtSearch.ForeColor = Color.White
+            TextBoxSearch.BackColor = Color.DarkRed
+            TextBoxSearch.ForeColor = Color.White
             mLastFindResult = Nothing
         Else
             match.Selected = True
@@ -1264,19 +1265,19 @@ Public Class frmMain
 
     Public Sub SearchMisspelling(offset As Integer)
         Dim startIndex As Integer = 0
-        If lvSubtitles.SelectedItems.Count > 0 Then
+        If ListViewSubtitles.SelectedItems.Count > 0 Then
             startIndex = GetLastSelectedIndex() + offset
-            If startIndex = lvSubtitles.Items.Count Then startIndex = 0
+            If startIndex = ListViewSubtitles.Items.Count Then startIndex = 0
         End If
 
         Dim se = dictionaries.GetSpellingEngine()
         Dim match As ListViewItem = Nothing
-        If lvSubtitles.Items.Count > 0 Then
+        If ListViewSubtitles.Items.Count > 0 Then
             Do
                 For i As Integer = startIndex To subtitles.Count - 1
                     For Each word In TextBoxWithSpellingSupport.GetWords(subtitles(i).TextOffsetted)
                         If Not se.Spell(word.Word) Then
-                            match = lvSubtitles.Items(i)
+                            match = ListViewSubtitles.Items(i)
                             Exit For
                         End If
                     Next
@@ -1289,8 +1290,8 @@ Public Class frmMain
         se.Dispose()
 
         If match Is Nothing Then
-            txtSearch.BackColor = Color.DarkRed
-            txtSearch.ForeColor = Color.White
+            TextBoxSearch.BackColor = Color.DarkRed
+            TextBoxSearch.ForeColor = Color.White
             mLastFindResult = Nothing
         Else
             match.Selected = True
@@ -1302,44 +1303,44 @@ Public Class frmMain
     End Sub
 
     Public Sub SelectFirstSubtitle()
-        If lvSubtitles.Items.Count > 0 Then
-            lvSubtitles.Items(0).Selected = True
-            lvSubtitles.Items(0).EnsureVisible()
+        If ListViewSubtitles.Items.Count > 0 Then
+            ListViewSubtitles.Items(0).Selected = True
+            ListViewSubtitles.Items(0).EnsureVisible()
         End If
     End Sub
 
     Private Sub DeleteSelectedSubtitles()
-        If lvSubtitles.SelectedItems.Count = 0 Then Exit Sub
+        If ListViewSubtitles.SelectedItems.Count = 0 Then Exit Sub
 
-        Dim indexes(lvSubtitles.SelectedIndices.Count - 1) As Integer
-        lvSubtitles.SelectedIndices.CopyTo(indexes, 0)
+        Dim indexes(ListViewSubtitles.SelectedIndices.Count - 1) As Integer
+        ListViewSubtitles.SelectedIndices.CopyTo(indexes, 0)
 
         For Each index As Integer In indexes
-            Dim c = subtitles(lvSubtitles.SelectedIndices(0))
+            Dim c = subtitles(ListViewSubtitles.SelectedIndices(0))
             subtitles.Remove(c)
 
             For i As Integer = c.Index - 1 To subtitles.Count - 1
                 subtitles(i).Index -= 1
             Next
 
-            lvSubtitles.Items.Remove(lvSubtitles.SelectedItems(0))
+            ListViewSubtitles.Items.Remove(ListViewSubtitles.SelectedItems(0))
         Next
 
         SaveOffsettedSubtitles(False, False)
     End Sub
 
     Private Function GetLastSelectedIndex() As Integer
-        If lvSubtitles.SelectedIndices.Count > 0 Then
+        If ListViewSubtitles.SelectedIndices.Count > 0 Then
             SelectAllButLast()
-            Return lvSubtitles.SelectedIndices(0)
+            Return ListViewSubtitles.SelectedIndices(0)
         Else
             Return -1
         End If
     End Function
 
     Private Sub SelectAllButLast()
-        Do While lvSubtitles.SelectedIndices.Count > 1
-            lvSubtitles.Items(lvSubtitles.SelectedIndices(0)).Selected = False
+        Do While ListViewSubtitles.SelectedIndices.Count > 1
+            ListViewSubtitles.Items(ListViewSubtitles.SelectedIndices(0)).Selected = False
         Loop
     End Sub
 End Class

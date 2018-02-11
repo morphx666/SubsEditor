@@ -192,16 +192,16 @@
         Me.disposedValue = True
     End Sub
 
-    ' TODO: override Finalize() only if Dispose(ByVal disposing As Boolean) above has code to free unmanaged resources.
+    ' TODO: override Finalize() only if Dispose(disposing As Boolean) above has code to free unmanaged resources.
     'Protected Overrides Sub Finalize()
-    '    ' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean) above.
+    '    ' Do not change this code.  Put cleanup code in Dispose(disposing As Boolean) above.
     '    Dispose(False)
     '    MyBase.Finalize()
     'End Sub
 
     ' This code added by Visual Basic to correctly implement the disposable pattern.
     Public Sub Dispose() Implements IDisposable.Dispose
-        ' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean) above.
+        ' Do not change this code.  Put cleanup code in Dispose(disposing As Boolean) above.
         Dispose(True)
         GC.SuppressFinalize(Me)
     End Sub

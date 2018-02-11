@@ -2,7 +2,7 @@
 Imports System.Net
 Imports HtmlAgilityPack
 
-Public Class frmOptions
+Public Class FormOptions
     Private Class IdentifiableWebClient
         Inherits WebClient
 
@@ -77,10 +77,10 @@ Public Class frmOptions
     Private Sub UpdateComboBox()
         ignoreUIEvents = True
 
-        cbDictionaries.Items.Clear()
+        ComboBoxDictionaries.Items.Clear()
         For Each d In mDictionaries
-            Dim index = cbDictionaries.Items.Add(d)
-            If d.IsDefault Then cbDictionaries.SelectedIndex = index
+            Dim index = ComboBoxDictionaries.Items.Add(d)
+            If d.IsDefault Then ComboBoxDictionaries.SelectedIndex = index
         Next
         PopulateLocales()
 
@@ -88,19 +88,19 @@ Public Class frmOptions
     End Sub
 
     Private Sub PopulateLocales()
-        cbLocales.Items.Clear()
+        ComboBoxLocales.Items.Clear()
 
-        Dim d = CType(cbDictionaries.SelectedItem, Dictionary)
+        Dim d = CType(ComboBoxDictionaries.SelectedItem, Dictionary)
         If d Is Nothing Then
-            cbLocales.Enabled = False
+            ComboBoxLocales.Enabled = False
         Else
             For Each l In d.Locales
-                Dim index = cbLocales.Items.Add(l)
-                If d.Locale = l Then cbLocales.SelectedIndex = index
+                Dim index = ComboBoxLocales.Items.Add(l)
+                If d.Locale = l Then ComboBoxLocales.SelectedIndex = index
             Next
 
-            If cbLocales.SelectedIndex = -1 Then cbLocales.SelectedIndex = 0
-            cbLocales.Enabled = True
+            If ComboBoxLocales.SelectedIndex = -1 Then ComboBoxLocales.SelectedIndex = 0
+            ComboBoxLocales.Enabled = True
         End If
     End Sub
 
@@ -108,7 +108,7 @@ Public Class frmOptions
         ignoreUIEvents = True
 
         For Each d In onlineDictionaries
-            d.ListViewItem = lvDictionaries.Items.Add(d.LanguageName)
+            d.ListViewItem = ListViewDictionaries.Items.Add(d.LanguageName)
             With d.ListViewItem
                 .SubItems.Add(d.Description)
 
@@ -123,7 +123,7 @@ Public Class frmOptions
             End With
         Next
 
-        lvDictionaries.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.ColumnContent)
+        ListViewDictionaries.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.ColumnContent)
         ignoreUIEvents = False
 
         PopulateLocales()
@@ -131,8 +131,8 @@ Public Class frmOptions
 
     Private Sub DoneDownloading(dictionary As OnlineDictionary, Optional errorMessage As String = "")
         Me.Invoke(New MethodInvoker(Sub()
-                                        lblLoading.Visible = False
-                                        pbLoading.Visible = False
+                                        LabelLoading.Visible = False
+                                        ProgressBarLoading.Visible = False
 
                                         If dictionary Is Nothing Then
                                             If errorMessage <> "" Then MsgBox(errorMessage + vbCrLf + vbCrLf + "You may re-try the process by clicking the Refresh button", MsgBoxStyle.Information Or MsgBoxStyle.OkOnly)
@@ -140,11 +140,11 @@ Public Class frmOptions
                                         Else
                                             dictionary.IsDownloading = False
 
-                                            For Each item As ListViewItem In lvDictionaries.Items
+                                            For Each item As ListViewItem In ListViewDictionaries.Items
                                                 If item.Tag.Equals(dictionary) Then
                                                     ignoreUIEvents = True
                                                     item.Checked = False
-                                                    item.SubItems(chStatus.Index).Text = errorMessage
+                                                    item.SubItems(ColumnHeaderStatus.Index).Text = errorMessage
                                                     Application.DoEvents()
                                                     ignoreUIEvents = False
                                                     Exit For
@@ -152,7 +152,7 @@ Public Class frmOptions
                                             Next
                                         End If
 
-                                        btnRefresh.Enabled = True
+                                        ButtonRefresh.Enabled = True
                                     End Sub))
     End Sub
 
@@ -189,11 +189,11 @@ Public Class frmOptions
         Return New OnlineDictionary(name, languageName, downloadLink, description)
     End Function
 
-    Private Sub lvDictionaries_ItemCheck(sender As Object, e As System.Windows.Forms.ItemCheckEventArgs) Handles lvDictionaries.ItemCheck
+    Private Sub ListViewDictionaries_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles ListViewDictionaries.ItemCheck
         If ignoreUIEvents Then Exit Sub
 
-        Dim item = lvDictionaries.Items(e.Index)
-        Dim d = CType(lvDictionaries.Items(e.Index).Tag, OnlineDictionary)
+        Dim item = ListViewDictionaries.Items(e.Index)
+        Dim d = CType(ListViewDictionaries.Items(e.Index).Tag, OnlineDictionary)
 
         If e.CurrentValue = CheckState.Checked Then
             If d.IsDownloading Then
@@ -207,7 +207,7 @@ Public Class frmOptions
                     Dim file = New IO.FileInfo(d.TargetFile)
                     Dim directory = New IO.DirectoryInfo(file.FullName.Replace(file.Extension, ""))
                     If directory.Exists Then directory.Delete(True)
-                    item.SubItems(chStatus.Index).Text = ""
+                    item.SubItems(ColumnHeaderStatus.Index).Text = ""
 
                     Dim dicts = (From dict In mDictionaries Where dict.Directory = directory.FullName Select dict)
                     If dicts.Any() Then mDictionaries.Remove(dicts.First())
@@ -221,7 +221,7 @@ Public Class frmOptions
         Else
             Dim downloadThread = New Thread(New ParameterizedThreadStart(AddressOf DownloadDictionary))
             d.DownloadThread = downloadThread
-            d.ListViewItem.SubItems(chStatus.Index).Text = "Initializing..."
+            d.ListViewItem.SubItems(ColumnHeaderStatus.Index).Text = "Initializing..."
             d.Error = Nothing
             downloadThread.Start(item)
         End If
@@ -239,15 +239,15 @@ Public Class frmOptions
                                                  d.IsDownloading = False
                                                  Me.Invoke(New MethodInvoker(Sub()
                                                                                  If e.Error IsNot Nothing Then
-                                                                                     d.ListViewItem.SubItems(chStatus.Index).Text = e.Error.Message
+                                                                                     d.ListViewItem.SubItems(ColumnHeaderStatus.Index).Text = e.Error.Message
                                                                                      d.ListViewItem.Checked = False
                                                                                      d.Error = e.Error
                                                                                  Else
                                                                                      If e.Cancelled Then
-                                                                                         d.ListViewItem.SubItems(chStatus.Index).Text = "Cancelled"
+                                                                                         d.ListViewItem.SubItems(ColumnHeaderStatus.Index).Text = "Cancelled"
                                                                                          d.ListViewItem.Checked = False
                                                                                      Else
-                                                                                         d.ListViewItem.SubItems(chStatus.Index).Text = "Successfully Downloaded"
+                                                                                         d.ListViewItem.SubItems(ColumnHeaderStatus.Index).Text = "Successfully Downloaded"
                                                                                      End If
                                                                                  End If
                                                                              End Sub))
@@ -258,7 +258,7 @@ Public Class frmOptions
                                                  tmpFile.MoveTo(d.TargetFile)
 
                                                  Try
-                                                     System.IO.Compression.ZipStorer.UnZip(tmpFile.FullName)
+                                                     IO.Compression.ZipStorer.UnZip(tmpFile.FullName)
                                                  Catch ex As Exception
                                                      DoneDownloading(d, "'" + item.Text + "' appears to be an Invalid dictionary" + vbCrLf + ex.Message)
                                                      Exit Sub
@@ -278,13 +278,13 @@ Public Class frmOptions
                                                    Dim d = GetDictionaryFromWebClient(CType(sender, IdentifiableWebClient))
                                                    If d Is Nothing Then Exit Sub
                                                    Me.Invoke(New MethodInvoker(Sub()
-                                                                                   d.ListViewItem.SubItems(chStatus.Index).Text = "Downloading: " + e.ProgressPercentage.ToString() + "%"
+                                                                                   d.ListViewItem.SubItems(ColumnHeaderStatus.Index).Text = "Downloading: " + e.ProgressPercentage.ToString() + "%"
                                                                                End Sub))
                                                End Sub
 
         Try
             Me.Invoke(New MethodInvoker(Sub()
-                                            dictionary.ListViewItem.SubItems(chStatus.Index).Text = "Downloading..."
+                                            dictionary.ListViewItem.SubItems(ColumnHeaderStatus.Index).Text = "Downloading..."
                                         End Sub))
 
             dictionary.IsDownloading = True
@@ -300,7 +300,7 @@ Public Class frmOptions
     Private Delegate Function GetDictionaryFromWebClientDelegate(wc As IdentifiableWebClient) As OnlineDictionary
     Private Function GetDictionaryFromWebClient(wc As IdentifiableWebClient) As OnlineDictionary
         Return Me.Invoke(New GetDictionaryFromWebClientDelegate(Function(iwc As IdentifiableWebClient)
-                                                                    For Each item As ListViewItem In lvDictionaries.Items
+                                                                    For Each item As ListViewItem In ListViewDictionaries.Items
                                                                         Dim d = CType(item.Tag, OnlineDictionary)
                                                                         If d.WebClient IsNot Nothing AndAlso d.WebClient.ID = iwc.ID Then Return d
                                                                     Next
@@ -308,33 +308,33 @@ Public Class frmOptions
                                                                 End Function), wc)
     End Function
 
-    Private Sub btnRefresh_Click(sender As System.Object, e As System.EventArgs) Handles btnRefresh.Click
+    Private Sub ButtonRefresh_Click(sender As Object, e As EventArgs) Handles ButtonRefresh.Click
         FetchDictionaries()
     End Sub
 
     Private Sub FetchDictionaries()
-        lvDictionaries.Items.Clear()
-        btnRefresh.Enabled = False
+        ListViewDictionaries.Items.Clear()
+        ButtonRefresh.Enabled = False
 
-        lblLoading.Visible = True
-        pbLoading.Visible = True
+        LabelLoading.Visible = True
+        ProgressBarLoading.Visible = True
         ignoreUIEvents = True
 
         loadDictionariesThread = New Thread(AddressOf DownloadDictionaries)
         loadDictionariesThread.Start()
     End Sub
 
-    Private Sub cbDefaultDictionary_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles cbDictionaries.SelectedIndexChanged
+    Private Sub ComboBoxDictionaries_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxDictionaries.SelectedIndexChanged
         If ignoreUIEvents Then Exit Sub
 
-        If cbDictionaries.SelectedItem Is Nothing Then
+        If ComboBoxDictionaries.SelectedItem Is Nothing Then
             mDictionaries.SetDefault(Nothing, "")
         Else
             PopulateLocales()
         End If
     End Sub
 
-    Private Sub cbLocales_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles cbLocales.SelectedIndexChanged
-        mDictionaries.SetDefault(CType(cbDictionaries.SelectedItem, Dictionary).ID, cbLocales.Text)
+    Private Sub ComboBoxLocales_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxLocales.SelectedIndexChanged
+        mDictionaries.SetDefault(CType(ComboBoxDictionaries.SelectedItem, Dictionary).ID, ComboBoxLocales.Text)
     End Sub
 End Class
